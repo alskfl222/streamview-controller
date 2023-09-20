@@ -15,6 +15,15 @@ class _LoginState extends State<Login> {
   bool _obscureText = true;
   String message = '';
 
+  Future<void> _performLogin() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    String result = await userProvider.signIn(
+        _emailController.text, _passwordController.text);
+    setState(() {
+      message = result;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -43,9 +52,12 @@ class _LoginState extends State<Login> {
                     obscureText: _obscureText,
                     decoration: InputDecoration(
                       labelText: "비밀번호",
-                      suffixIcon: IconButton(  // 추가한 부분
+                      suffixIcon: IconButton(
+                        // 추가한 부분
                         icon: Icon(
-                          _obscureText ? Icons.visibility : Icons.visibility_off,
+                          _obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
@@ -54,6 +66,7 @@ class _LoginState extends State<Login> {
                         },
                       ),
                     ),
+                    onSubmitted: (value) => _performLogin(),
                   )),
               const SizedBox(height: 32),
               Row(
@@ -78,13 +91,7 @@ class _LoginState extends State<Login> {
                   //     )),
                   // const SizedBox(width: 16),
                   ElevatedButton(
-                      onPressed: () async {
-                        String result = await userProvider.signIn(
-                            _emailController.text, _passwordController.text);
-                        setState(() {
-                          message = result;
-                        });
-                      },
+                      onPressed: _performLogin,
                       child: const Padding(
                         padding: EdgeInsets.all(8),
                         child: Text('로그인',

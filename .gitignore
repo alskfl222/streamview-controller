@@ -45,3 +45,10 @@ app.*.map.json
 
 
 .env
+
+android
+ios
+linux
+macos
+web
+windows
