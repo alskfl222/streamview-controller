@@ -89,7 +89,7 @@ class MyAppState extends State<MyApp> {
         title: 'StreamView Controller',
         home: Consumer<UserProvider>(
           builder: (context, user, child) {
-            return user.status == Status.authenticated
+            return user.user != null || user.status == Status.authenticated
                 ? MyHomePage(
                     title: 'StreamView Controller',
                     sendMessage: _sendMessage,
