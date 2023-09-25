@@ -26,6 +26,7 @@ class UserProvider extends ChangeNotifier {
     } else {
       _status = Status.authenticated;
     }
+    _user = user;
     notifyListeners();
   }
 
