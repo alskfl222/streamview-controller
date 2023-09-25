@@ -45,3 +45,13 @@ app.*.map.json
 
 
 .env
+env
+
+android
+ios
+linux
+macos
+web
+windows
+
+.firebase
