@@ -10,6 +10,7 @@ import 'user.dart';
 import 'homepage.dart';
 import 'login.dart';
 import 'server_error.dart';
+import 'todo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,18 +86,23 @@ class MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'StreamView Controller',
-        home: Consumer<UserProvider>(
+      debugShowCheckedModeBanner: false,
+      title: 'StreamView Controller',
+      initialRoute: '/', // 초기 경로를 정의
+      routes: {
+        '/': (context) => Consumer<UserProvider>(
           builder: (context, user, child) {
             return user.status == Status.authenticated
                 ? MyHomePage(
-                    title: 'StreamView Controller',
-                    sendMessage: _sendMessage,
-                  )
+              title: 'StreamView Controller',
+              sendMessage: _sendMessage,
+            )
                 : const Login();
           },
-        ));
+        ),
+        '/todo': (context) => const TodoList(), // Todo 페이지 라우트 추가
+      },
+    );
   }
 
   @override
