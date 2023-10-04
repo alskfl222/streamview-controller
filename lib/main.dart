@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: "env");
+  usePathUrlStrategy();
   runApp(
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
