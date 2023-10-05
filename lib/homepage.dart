@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:streamview_controller/todo/container.dart';
 import 'user.dart';
-import 'tab.dart';
+import 'current/container.dart';
 
 class MyHomePage extends StatelessWidget {
   final String title;
-  final Function(String, Map<String, dynamic>) sendMessage;
+  final Function(Map<String, dynamic>) sendMessage;
 
   const MyHomePage({
     super.key,
@@ -52,7 +52,7 @@ class MyHomePage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            TabContent(sendMessage: sendMessage, tabName: "Tab 1"),
+            CurrentTab(),
             const TodoList(),
           ],
         ),

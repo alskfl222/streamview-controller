@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
@@ -11,7 +9,6 @@ import 'user.dart';
 import 'homepage.dart';
 import 'login.dart';
 import 'server_error.dart';
-import 'todo/container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +16,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: "env");
-  usePathUrlStrategy();
   runApp(
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
@@ -46,7 +42,7 @@ class MyAppState extends State<MyApp> {
     _channel = WebSocketChannel.connect(
       Uri.parse(dotenv.env['WEBSOCKET_URL']!),
     );
-    _sendMessage("init", {});
+    _sendMessage({"type": "init"});
 
     _channel.stream.listen(
       (data) {
@@ -65,13 +61,11 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  void _sendMessage(String type, Map<String, dynamic> data) {
+  void _sendMessage(Map<String, dynamic> data) {
     var jsonMessage = jsonEncode({
       'sender': 'controller',
-      'user': 'owner',
       'time': DateTime.now().toIso8601String(),
-      'type': type,
-      'data': data,
+      ...?data,
     });
 
     _channel.sink.add(jsonMessage);
@@ -93,16 +87,15 @@ class MyAppState extends State<MyApp> {
       initialRoute: '/', // 초기 경로를 정의
       routes: {
         '/': (context) => Consumer<UserProvider>(
-          builder: (context, user, child) {
-            return user.status == Status.authenticated
-                ? MyHomePage(
-              title: 'StreamView Controller',
-              sendMessage: _sendMessage,
-            )
-                : const Login();
-          },
-        ),
-        '/todo': (context) => const TodoList(), // Todo 페이지 라우트 추가
+              builder: (context, user, child) {
+                return user.status == Status.authenticated
+                    ? MyHomePage(
+                        title: 'StreamView Controller',
+                        sendMessage: _sendMessage,
+                      )
+                    : const Login();
+              },
+            ),
       },
     );
   }

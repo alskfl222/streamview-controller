@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:streamview_controller/todo/list.dart';
-import 'input.dart';
 import '../user.dart';
+import 'list.dart';
+import 'input.dart';
 
 class TodoItem {
   final String id;
@@ -34,17 +34,6 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final List<TodoItem> _todos = [];
   DateTime selectedDate = DateTime.now();
-
-  // DateTime? plannedStartTime;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    var userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (userProvider.status != Status.authenticated) {
-      Navigator.pushReplacementNamed(context, '/');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
