@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:streamview_controller/todo/container.dart';
 import 'user.dart';
 import 'tab.dart';
 
@@ -45,14 +46,14 @@ class MyHomePage extends StatelessWidget {
           bottom: const TabBar(
             tabs: [
               Tab(text: "현재"),
-              Tab(text: "변화"),
+              Tab(text: "할 일"),
             ],
           ),
         ),
         body: TabBarView(
           children: [
             TabContent(sendMessage: sendMessage, tabName: "Tab 1"),
-            TabContent(sendMessage: sendMessage, tabName: "Tab 2"),
+            const TodoList(),
           ],
         ),
       ),
