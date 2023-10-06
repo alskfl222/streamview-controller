@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'options.dart';
 
 class CurrentTab extends StatefulWidget {
@@ -17,19 +18,52 @@ class _CurrentTabState extends State<CurrentTab> {
     return Scaffold(
       body: Column(
         children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isOptionsVisible = !_isOptionsVisible;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Text(
+                  _currentDisplay ?? "선택 없음",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(
+                  width: 12,
+                ),
+                Text(
+                  DateFormat('y년 M월 d일').format(_selectedDate),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isOptionsVisible = !_isOptionsVisible;
+                });
+              },
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(_currentDisplay ?? "화면 없음"),
+                  ),
+                ],
               ),
-              child: Text(_currentDisplay ?? "화면 없음"),
             ),
           ),
           if (_isOptionsVisible)
@@ -38,6 +72,7 @@ class _CurrentTabState extends State<CurrentTab> {
               onCurrentChange: _onCurrentChange,
               onDateSelected: _onDateSelected,
               onGameSelected: _onGameSelected,
+              onCloseOptions: _onCloseOptions,
             ),
         ],
       ),
@@ -59,6 +94,12 @@ class _CurrentTabState extends State<CurrentTab> {
   void _onGameSelected(String? selectedGame) {
     setState(() {
       _selectedGame = selectedGame;
+    });
+  }
+
+  void _onCloseOptions() {
+    setState(() {
+      _isOptionsVisible = false;
     });
   }
 }

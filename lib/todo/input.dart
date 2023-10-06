@@ -40,7 +40,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                     _selectedCharacter = null; // 타입 변경 시 캐릭터 선택도 초기화
                   });
                 },
-                hint: Text("종류 선택"),
+                hint: const Text("종류 선택"),
               ),
               if (_selectedType == '사냥' || _selectedType == '보스')
                 DropdownButton<String>(
@@ -57,7 +57,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                       _selectedCharacter = newValue;
                     });
                   },
-                  hint: Text("캐릭터 선택"),
+                  hint: const Text("캐릭터 선택"),
                 )
               else if (_selectedType == '기타')
                 SizedBox(

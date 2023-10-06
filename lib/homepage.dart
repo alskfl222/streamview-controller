@@ -46,7 +46,7 @@ class MyHomePage extends StatelessWidget {
           bottom: const TabBar(
             tabs: [
               Tab(text: "현재"),
-              Tab(text: "할 일"),
+              Tab(text: "할일"),
             ],
           ),
         ),
