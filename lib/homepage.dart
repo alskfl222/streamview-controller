@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:streamview_controller/todo/container.dart';
-import 'user.dart';
+import 'provider/user.dart';
 import 'current/container.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -22,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedTabIndex = 0; // 현재 선택된 탭의 인덱스
 
   // 위젯 배열로 관리
-  final List<Widget> _tabs = [CurrentTab(), const TodoList()];
+  final List<Widget> _tabs = [const CurrentTab(), const TodoList()];
 
   @override
   Widget build(BuildContext context) {

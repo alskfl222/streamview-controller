@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../provider/current.dart';
 import 'options.dart';
 
 class CurrentTab extends StatefulWidget {
@@ -10,18 +13,16 @@ class CurrentTab extends StatefulWidget {
 }
 
 class _CurrentTabState extends State<CurrentTab> {
-  String? _currentDisplay;
-  DateTime _selectedDate = DateTime.now();
-  String? _selectedGame;
-
   @override
   Widget build(BuildContext context) {
+    final currentData = Provider.of<CurrentDataProvider>(context);
     return Scaffold(
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
+              width: MediaQuery.of(context).size.width,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.blue, width: 2),
@@ -42,23 +43,23 @@ class _CurrentTabState extends State<CurrentTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
-                      _currentDisplay ?? "선택 없음",
+                      currentData.currentDisplay ?? "선택 없음",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (_currentDisplay == "할일")
+                    if (currentData.currentDisplay == "할일")
                       Text(
-                        DateFormat('y년 M월 d일').format(_selectedDate),
+                        DateFormat('y년 M월 d일').format(currentData.selectedDate),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (_currentDisplay == "게임")
+                    if (currentData.currentDisplay == "게임")
                       Text(
-                        _selectedGame!,
+                        currentData.selectedGame!,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -69,6 +70,10 @@ class _CurrentTabState extends State<CurrentTab> {
               ),
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.visibility),
+            onPressed: _launchViewer,
+          )
         ],
       ),
     );
@@ -83,31 +88,32 @@ class _CurrentTabState extends State<CurrentTab> {
             borderRadius: BorderRadius.circular(16),
           ),
           child: Options(
-            currentDisplay: _currentDisplay,
-            onCurrentChange: _onCurrentChange,
-            onDateSelected: _onDateSelected,
-            onGameSelected: _onGameSelected,
+            currentDisplay:
+                Provider.of<CurrentDataProvider>(context, listen: false)
+                    .currentDisplay,
+            onCurrentChange: (value) {
+              Provider.of<CurrentDataProvider>(context, listen: false)
+                  .setCurrentDisplay(value);
+            },
+            onDateSelected: (date) {
+              Provider.of<CurrentDataProvider>(context, listen: false)
+                  .setSelectedDate(date);
+            },
+            onGameSelected: (game) {
+              Provider.of<CurrentDataProvider>(context, listen: false)
+                  .setSelectedGame(game);
+            },
           ),
         );
       },
     );
   }
 
-  void _onCurrentChange(String? selectCurrentDisplay) {
-    setState(() {
-      _currentDisplay = selectCurrentDisplay;
-    });
-  }
+  Future<void> _launchViewer() async {
+    final fullUrl = Uri.base.resolveUri(Uri(path: '/viewer'));
 
-  void _onDateSelected(DateTime selectedDate) {
-    setState(() {
-      _selectedDate = selectedDate;
-    });
-  }
-
-  void _onGameSelected(String? selectedGame) {
-    setState(() {
-      _selectedGame = selectedGame;
-    });
+    if (!await launchUrl(fullUrl)) {
+      throw Exception('Could not launch $fullUrl');
+    }
   }
 }

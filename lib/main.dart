@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'firebase_options.dart';
-import 'user.dart';
+import 'provider/websocket.dart';
+import 'provider/user.dart';
+import 'provider/current.dart';
 import 'homepage.dart';
 import 'login.dart';
+import 'viewer.dart';
 import 'server_error.dart';
 
 void main() async {
@@ -16,22 +20,31 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: "env");
+  usePathUrlStrategy();
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider(),
-      child: const MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
+        ChangeNotifierProvider(create: (context) => WebSocketProvider(
+          WebSocketChannel.connect(
+            Uri.parse(dotenv.env['WEBSOCKET_URL']!),
+          ),
+        )),
+      ],
+      child: const StreamviewController(),
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class StreamviewController extends StatefulWidget {
+  const StreamviewController({super.key});
 
   @override
-  MyAppState createState() => MyAppState();
+  StreamviewControllerState createState() => StreamviewControllerState();
 }
 
-class MyAppState extends State<MyApp> {
+class StreamviewControllerState extends State<StreamviewController> {
   late WebSocketChannel _channel;
   bool _isWebSocketError = false;
   String _errorMessage = '';
@@ -65,7 +78,7 @@ class MyAppState extends State<MyApp> {
     var jsonMessage = jsonEncode({
       'sender': 'controller',
       'time': DateTime.now().toIso8601String(),
-      ...?data,
+      ...data,
     });
 
     _channel.sink.add(jsonMessage);
@@ -84,7 +97,7 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'StreamView Controller',
-      initialRoute: '/', // 초기 경로를 정의
+      initialRoute: '/',
       routes: {
         '/': (context) => Consumer<UserProvider>(
               builder: (context, user, child) {
@@ -96,6 +109,7 @@ class MyAppState extends State<MyApp> {
                     : const Login();
               },
             ),
+        '/viewer': (context) => const ViewerPage(),
       },
     );
   }

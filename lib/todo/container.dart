@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../user.dart';
+import '../provider/user.dart';
 import 'list.dart';
 import 'input.dart';
 
