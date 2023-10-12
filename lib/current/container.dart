@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'options.dart';
 
 class CurrentTab extends StatefulWidget {
+  const CurrentTab({super.key});
+
   @override
   _CurrentTabState createState() => _CurrentTabState();
 }
