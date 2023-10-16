@@ -87,23 +87,7 @@ class _CurrentTabState extends State<CurrentTab> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Options(
-            currentDisplay:
-                Provider.of<CurrentDataProvider>(context, listen: false)
-                    .currentDisplay,
-            onCurrentChange: (value) {
-              Provider.of<CurrentDataProvider>(context, listen: false)
-                  .setCurrentDisplay(value);
-            },
-            onDateSelected: (date) {
-              Provider.of<CurrentDataProvider>(context, listen: false)
-                  .setSelectedDate(date);
-            },
-            onGameSelected: (game) {
-              Provider.of<CurrentDataProvider>(context, listen: false)
-                  .setSelectedGame(game);
-            },
-          ),
+          child: const Options(),
         );
       },
     );

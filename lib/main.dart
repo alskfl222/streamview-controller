@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,11 +25,13 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
-        ChangeNotifierProvider(create: (context) => WebSocketProvider(
-          WebSocketChannel.connect(
-            Uri.parse(dotenv.env['WEBSOCKET_URL']!),
-          ),
-        )),
+        ChangeNotifierProvider(
+            create: (context) => WebSocketProvider(
+                  WebSocketChannel.connect(
+                    Uri.parse(dotenv.env['WEBSOCKET_URL']!),
+                  ),
+                  context,
+                )),
       ],
       child: const StreamviewController(),
     ),
@@ -45,51 +46,14 @@ class StreamviewController extends StatefulWidget {
 }
 
 class StreamviewControllerState extends State<StreamviewController> {
-  late WebSocketChannel _channel;
-  bool _isWebSocketError = false;
-  String _errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _channel = WebSocketChannel.connect(
-      Uri.parse(dotenv.env['WEBSOCKET_URL']!),
-    );
-    _sendMessage({"type": "init"});
-
-    _channel.stream.listen(
-      (data) {
-        // 데이터 처리 로직 (생략 가능)
-      },
-      onError: (error) {
-        setState(() {
-          _isWebSocketError = true;
-          _errorMessage = error.toString();
-        });
-      },
-      onDone: () {
-        // 웹소켓 연결 종료시 로직 (생략 가능)
-      },
-      cancelOnError: true,
-    );
-  }
-
-  void _sendMessage(Map<String, dynamic> data) {
-    var jsonMessage = jsonEncode({
-      'sender': 'controller',
-      'time': DateTime.now().toIso8601String(),
-      ...data,
-    });
-
-    _channel.sink.add(jsonMessage);
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isWebSocketError) {
+    final webSocketProvider = Provider.of<WebSocketProvider>(context);
+
+    if (webSocketProvider.isWebSocketError) {
       return MaterialApp(
         home: ServerErrorPage(
-          errorMessage: _errorMessage,
+          errorMessage: webSocketProvider.errorMessage,
         ),
       );
     }
@@ -104,7 +68,7 @@ class StreamviewControllerState extends State<StreamviewController> {
                 return user.status == Status.authenticated
                     ? MyHomePage(
                         title: 'StreamView Controller',
-                        sendMessage: _sendMessage,
+                        // 웹소켓 메시지를 보내는 로직이 필요하다면, 여기에 추가
                       )
                     : const Login();
               },
@@ -112,11 +76,5 @@ class StreamviewControllerState extends State<StreamviewController> {
         '/viewer': (context) => const ViewerPage(),
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _channel.sink.close();
-    super.dispose();
   }
 }

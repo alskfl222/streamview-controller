@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/websocket.dart';
 import 'current_button.dart';
 
 class Options extends StatefulWidget {
-  final String? currentDisplay;
-  final Function(String?) onCurrentChange;
-  final Function(DateTime) onDateSelected;
-  final Function(String?) onGameSelected;
-
   const Options({
     super.key,
-    required this.currentDisplay,
-    required this.onCurrentChange,
-    required this.onDateSelected,
-    required this.onGameSelected,
   });
 
   @override
@@ -95,12 +88,7 @@ class _OptionsState extends State<Options> {
           const SizedBox(height: 12),
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () {
-              widget.onCurrentChange(_selectedCurrent);
-              widget.onDateSelected(_selectedDate);
-              widget.onGameSelected(_selectedGame);
-              Navigator.pop(context);
-            },
+            onPressed: _submitServer,
           ),
         ]
       ],
@@ -154,5 +142,20 @@ class _OptionsState extends State<Options> {
       return true;
     }
     return false;
+  }
+
+  void _submitServer() {
+    final WebSocketProvider webSocketProvider =
+        Provider.of<WebSocketProvider>(context, listen: false);
+    Map<String, dynamic> data = {
+      'type': 'current',
+      'option': {
+        'select': _selectedCurrent,
+        'date': _selectedDate.toIso8601String(),
+        'game': _selectedGame,
+      }
+    };
+    webSocketProvider.sendMessage(data);
+    Navigator.pop(context);
   }
 }

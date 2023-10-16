@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:streamview_controller/todo/container.dart';
+import 'todo/container.dart';
 import 'provider/user.dart';
 import 'current/container.dart';
 
 class MyHomePage extends StatefulWidget {
   final String title;
-  final Function(Map<String, dynamic>) sendMessage;
 
   const MyHomePage({
     super.key,
     required this.title,
-    required this.sendMessage,
   });
 
   @override
