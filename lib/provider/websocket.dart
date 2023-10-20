@@ -1,17 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../provider/user.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'current.dart';
 
 class WebSocketProvider with ChangeNotifier {
   late WebSocketChannel _channel;
+  late BuildContext _context;
   bool isWebSocketError = false;
   String errorMessage = '';
 
   WebSocketProvider(WebSocketChannel channel, BuildContext context) {
     _channel = channel;
-    _initWebSocket(context);
+    _context = context;
+    _initWebSocket(_context);
   }
 
   void _initWebSocket(BuildContext context) {
@@ -42,8 +45,13 @@ class WebSocketProvider with ChangeNotifier {
   }
 
   void sendMessage(Map<String, dynamic> data) {
-    var jsonMessage = jsonEncode({
-      'sender': 'controller',
+    UserProvider userProvider =
+        Provider.of<UserProvider>(_context, listen: false);
+    String jsonMessage = jsonEncode({
+      'sender': {
+        'type': 'controller',
+        'user': userProvider.user != null ? userProvider.user!.email : '',
+      },
       'time': DateTime.now().toIso8601String(),
       ...data,
     });

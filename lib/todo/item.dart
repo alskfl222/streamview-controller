@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'container.dart';
+import '../provider/todo.dart';
 
 class TodoItemWidget extends StatelessWidget {
   final TodoItem todo;
@@ -19,10 +19,8 @@ class TodoItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8.0),
-              Text("종류: ${todo.type}"),
-              if (todo.type == "사냥" || todo.type == "보스")
-                Text("캐릭터: ${todo.character}"),
-              if (todo.type == "기타") Text("기타: ${todo.description}"),
+              Text("종류: ${todo.taskType}"),
+              if (todo.taskType == "게임") Text("게임: ${todo.game}"),
             ],
           ),
           trailing: Row(
@@ -49,6 +47,15 @@ class TodoItemWidget extends StatelessWidget {
             ],
           ),
           children: [
+            ListTile(
+              title: Text('Activity: ${todo.activity}'),
+            ),
+            ListTile(
+              title: Text('Character: ${todo.character}'),
+            ),
+            ListTile(
+              title: Text('Description: ${todo.description}'),
+            ),
             ListTile(
               title: Text('Added Time: ${todo.addedTime}'),
             ),

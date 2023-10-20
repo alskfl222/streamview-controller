@@ -1,28 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../provider/user.dart';
+import '../provider/todo.dart';
 import 'list.dart';
-import 'input.dart';
-
-class TodoItem {
-  final String id;
-  final String description;
-  final String type; // '사냥', '보스', '기타'
-  final String? character; // 'a', 'b', 'c' 또는 null (임시)
-  final DateTime addedTime;
-  DateTime? plannedStartTime;
-  DateTime? actualStartTime;
-
-  TodoItem({
-    required this.id,
-    required this.description,
-    required this.type,
-    required this.addedTime,
-    this.character,
-    this.plannedStartTime,
-    this.actualStartTime,
-  });
-}
+import 'input/container.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({super.key});
@@ -32,11 +12,11 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
-  final List<TodoItem> _todos = [];
-  DateTime selectedDate = DateTime.now();
-
   @override
   Widget build(BuildContext context) {
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
+    DateTime date = todoProvider.date;
     return Scaffold(
       body: Column(
         children: [
@@ -48,7 +28,7 @@ class _TodoListState extends State<TodoList> {
                   children: [
                     Expanded(
                       child: Text(
-                        "${selectedDate.toLocal()}".split(' ')[0], // 현재 날짜를 표시
+                        "${date.toLocal()}".split(' ')[0],
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -60,58 +40,29 @@ class _TodoListState extends State<TodoList> {
                       onPressed: () async {
                         final DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: selectedDate,
+                          initialDate: date,
                           firstDate: DateTime.now(),
                           lastDate:
                               DateTime.now().add(const Duration(days: 365)),
                         );
-                        if (pickedDate != null && pickedDate != selectedDate) {
-                          setState(() {
-                            selectedDate = pickedDate;
-                          });
+                        if (pickedDate != null && pickedDate != date) {
+                          todoProvider.changeDate(pickedDate);
                         }
                       },
                     ),
                   ],
                 ),
-                TodoInputWidget(onAddTodo: _addTodo)
+                const TodoInputWidget()
               ],
             ),
           ),
-          TodoListWidget(
-            todos: _todos,
-            onReorder: _onReorder,
-          ),
+          const TodoListWidget(),
           ElevatedButton(
-            onPressed: _sendToServer,
+            onPressed: todoProvider.sendTodos,
             child: const Text("Save"),
           ),
         ],
       ),
     );
-  }
-
-  void _addTodo(TodoItem item) {
-    setState(() {
-      _todos.add(item);
-    });
-  }
-
-  void _onReorder(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-    setState(() {
-      final item = _todos.removeAt(oldIndex);
-      _todos.insert(newIndex, item);
-    });
-  }
-
-  void _sendToServer() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    print(userProvider.user?.email);
-    // 서버로 데이터를 보내는 로직을 구현해야 합니다.
-    // 현재는 단순히 콘솔에 출력만 하도록 했습니다.
-    print("Sending data to server: $_todos");
   }
 }

@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'provider/websocket.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
+import 'provider/todo.dart';
 import 'homepage.dart';
 import 'login.dart';
 import 'viewer.dart';
@@ -32,6 +33,7 @@ void main() async {
                   ),
                   context,
                 )),
+        ChangeNotifierProvider(create: (context) => TodoProvider(context)),
       ],
       child: const StreamviewController(),
     ),
@@ -66,9 +68,8 @@ class StreamviewControllerState extends State<StreamviewController> {
         '/': (context) => Consumer<UserProvider>(
               builder: (context, user, child) {
                 return user.status == Status.authenticated
-                    ? MyHomePage(
+                    ? const MyHomePage(
                         title: 'StreamView Controller',
-                        // 웹소켓 메시지를 보내는 로직이 필요하다면, 여기에 추가
                       )
                     : const Login();
               },
