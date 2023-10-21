@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'provider/user.dart';
 
@@ -15,18 +16,30 @@ class _LoginState extends State<Login> {
   bool _obscureText = true;
   String message = '';
 
-  Future<void> _performLogin() async {
+  @override
+  void initState() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.status == Status.authenticated) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/');
+      });
+    }
+  }
+
+  Future<void> _performLogin(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     String result = await userProvider.signIn(
         _emailController.text, _passwordController.text);
     setState(() {
       message = result;
     });
+    if (result == '로그인 성공') {
+      Navigator.of(context).pushReplacementNamed('/');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text("로그인"),
@@ -66,7 +79,7 @@ class _LoginState extends State<Login> {
                         },
                       ),
                     ),
-                    onSubmitted: (value) => _performLogin(),
+                    onSubmitted: (value) => _performLogin(context),
                   )),
               const SizedBox(height: 32),
               Row(
@@ -91,7 +104,7 @@ class _LoginState extends State<Login> {
                   //     )),
                   // const SizedBox(width: 16),
                   ElevatedButton(
-                      onPressed: _performLogin,
+                      onPressed: () => _performLogin(context),
                       child: const Padding(
                         padding: EdgeInsets.all(8),
                         child: Text('로그인',

@@ -11,7 +11,7 @@ import 'provider/current.dart';
 import 'provider/todo.dart';
 import 'homepage.dart';
 import 'login.dart';
-import 'viewer.dart';
+import 'viewer/container.dart';
 import 'server_error.dart';
 
 void main() async {
@@ -50,30 +50,13 @@ class StreamviewController extends StatefulWidget {
 class StreamviewControllerState extends State<StreamviewController> {
   @override
   Widget build(BuildContext context) {
-    final webSocketProvider = Provider.of<WebSocketProvider>(context);
-
-    if (webSocketProvider.isWebSocketError) {
-      return MaterialApp(
-        home: ServerErrorPage(
-          errorMessage: webSocketProvider.errorMessage,
-        ),
-      );
-    }
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'StreamView Controller',
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
-        '/': (context) => Consumer<UserProvider>(
-              builder: (context, user, child) {
-                return user.status == Status.authenticated
-                    ? const MyHomePage(
-                        title: 'StreamView Controller',
-                      )
-                    : const Login();
-              },
-            ),
+        '/login': (context) => const Login(),
+        '/': (context) => const MyHomePage(),
         '/viewer': (context) => const ViewerPage(),
       },
     );

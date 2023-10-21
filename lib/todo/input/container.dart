@@ -148,12 +148,21 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     }
   }
 
+  void _resetInputState() {
+    _selectedTaskType = null;
+    _selectedGame = null;
+    _selectedActivity = null;
+    _selectedCharacter = null;
+    _textController.clear();
+    plannedStartTime = null;
+  }
+
   void _handleAddTodo() {
     TodoProvider todoProvider =
         Provider.of<TodoProvider>(context, listen: false);
     if (_selectedTaskType != null) {
       final todoItem = TodoItem(
-        id: DateTime.now().toString(),
+        id: DateTime.now().toIso8601String(),
         taskType: _selectedTaskType!,
         game: _selectedGame ?? "",
         activity: _selectedActivity ?? "",
@@ -163,8 +172,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
         plannedStartTime: plannedStartTime,
       );
       todoProvider.addTodo(todoItem);
-      plannedStartTime = null;
-      _textController.clear();
+      _resetInputState();
     }
   }
 }
