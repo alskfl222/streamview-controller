@@ -1,30 +1,39 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'todo/container.dart';
 import 'provider/user.dart';
+import 'provider/current.dart';
 import 'current/container.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class LandingPage extends StatefulWidget {
+  const LandingPage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _LandingPageState createState() => _LandingPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _LandingPageState extends State<LandingPage> {
   int _selectedTabIndex = 0;
   final List<Widget> _tabs = [const CurrentTab(), const TodoList()];
 
   Future<void> fetchInitialData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final currentProvider =
+        Provider.of<CurrentDataProvider>(context, listen: false);
     User? user = userProvider.user;
-
+    final serverUrl = dotenv.env['SERVER_URL']!;
+    if (serverUrl == null) {
+      print('SERVER_URL is not defined in env file.');
+      return;
+    }
     if (user != null) {
       final token = await user.getIdToken();
-
       final response = await http.get(
         Uri.parse('http://localhost:5005/controller'),
         headers: {
@@ -34,8 +43,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
       if (response.statusCode == 200) {
         print('Server response: ${response.body}');
+        dynamic current = jsonDecode(response.body)["current"];
+        currentProvider.setCurrentDisplay(current['display']);
+        currentProvider.setSelectedDate(DateTime.tryParse(current['date'])!);
+        currentProvider.setSelectedGame(current['game']);
       } else {
-        print('Failed to fetch initial data. Status code: ${response.statusCode}');
+        print(
+            'Failed to fetch initial data. Status code: ${response.statusCode}');
       }
     } else {
       print('No user is signed in.');

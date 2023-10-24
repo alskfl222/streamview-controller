@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ViewerPage extends StatelessWidget {
-  const ViewerPage({super.key});
+  final String uid;
+
+  const ViewerPage({Key? key, required this.uid}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Viewer Content Here')),
+    return Scaffold(
+      body: Center(child: Text(uid)),
     );
   }
 }

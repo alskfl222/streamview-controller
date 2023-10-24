@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:streamview_controller/provider/user.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../provider/current.dart';
+import 'package:streamview_controller/provider/current.dart';
+import 'package:streamview_controller/util.dart';
 import 'options.dart';
 
 class CurrentTab extends StatefulWidget {
@@ -43,13 +45,14 @@ class _CurrentTabState extends State<CurrentTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
-                      currentData.currentDisplay ?? "선택 없음",
+                      currentData.currentDisplay != null ?
+                          translated[currentData.currentDisplay]! : "없음",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (currentData.currentDisplay == "할일")
+                    if (currentData.currentDisplay == "todo")
                       Text(
                         DateFormat('y년 M월 d일').format(currentData.selectedDate),
                         style: const TextStyle(
@@ -57,7 +60,7 @@ class _CurrentTabState extends State<CurrentTab> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    if (currentData.currentDisplay == "게임")
+                    if (currentData.currentDisplay == "game")
                       Text(
                         currentData.selectedGame!,
                         style: const TextStyle(
@@ -94,10 +97,13 @@ class _CurrentTabState extends State<CurrentTab> {
   }
 
   Future<void> _launchViewer() async {
-    final fullUrl = Uri.base.resolveUri(Uri(path: '/viewer'));
-
-    if (!await launchUrl(fullUrl)) {
-      throw Exception('Could not launch $fullUrl');
-    }
+    final UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
+    final uid = userProvider.user!.uid;
+    Navigator.pushNamed(context, '/viewer/$uid');
+    // final fullUrl = Uri.base.resolveUri(Uri(path: '/viewer/$uid'));
+    //
+    // if (!await launchUrl(fullUrl)) {
+    //   throw Exception('Could not launch $fullUrl');
+    // }
   }
 }

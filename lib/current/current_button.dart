@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streamview_controller/util.dart';
 
 class CurrentButton extends StatelessWidget {
   final String option;
@@ -12,6 +13,7 @@ class CurrentButton extends StatelessWidget {
     this.padding = const EdgeInsets.all(12.0),
   });
 
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
@@ -19,7 +21,7 @@ class CurrentButton extends StatelessWidget {
       style: ButtonStyle(
         padding: MaterialStateProperty.all<EdgeInsetsGeometry>(padding),
       ),
-      child: Text(option),
+      child: Text(translated[option] ?? option),
     );
   }
 }

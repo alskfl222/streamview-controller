@@ -9,10 +9,9 @@ import 'provider/websocket.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
 import 'provider/todo.dart';
-import 'homepage.dart';
+import 'landing.dart';
 import 'login.dart';
-import 'viewer/container.dart';
-import 'server_error.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,8 +55,7 @@ class StreamviewControllerState extends State<StreamviewController> {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const Login(),
-        '/': (context) => const MyHomePage(),
-        '/viewer': (context) => const ViewerPage(),
+        '/': (context) => const LandingPage(),
       },
     );
   }

@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../provider/websocket.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../provider/user.dart';
 import 'current_button.dart';
 
 class Options extends StatefulWidget {
-  const Options({
-    super.key,
-  });
+  const Options({super.key});
 
   @override
   _OptionsState createState() => _OptionsState();
@@ -16,7 +18,8 @@ class _OptionsState extends State<Options> {
   final List<String> _mainGames = ['메이플스토리', 'DJMAX'];
   final List<String> _games = ['메이플스토리', 'DJMAX'];
   String? _selectedCurrent;
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   String? _selectedGame;
   final TextEditingController _gameController = TextEditingController();
 
@@ -32,12 +35,12 @@ class _OptionsState extends State<Options> {
                 spacing: 12.0, // 버튼 간의 가로 간격
                 runSpacing: 8.0, // 버튼 간의 세로 간격
                 children: [
-                  CurrentButton(option: "할일", onPressed: _onPressedTodo),
-                  CurrentButton(option: "게임", onPressed: _onPressedGame),
+                  CurrentButton(option: "todo", onPressed: _onPressedTodo),
+                  CurrentButton(option: "game", onPressed: _onPressedGame),
                 ],
               ),
             )),
-        if (_selectedCurrent == "게임")
+        if (_selectedCurrent == "game")
           Row(
             children: [
               Flexible(
@@ -97,14 +100,14 @@ class _OptionsState extends State<Options> {
 
   void _onPressedTodo() {
     setState(() {
-      _selectedCurrent = "할일";
+      _selectedCurrent = "todo";
     });
     _showDatePicker();
   }
 
   void _onPressedGame() {
     setState(() {
-      _selectedCurrent = "게임";
+      _selectedCurrent = "game";
     });
   }
 
@@ -134,28 +137,85 @@ class _OptionsState extends State<Options> {
   }
 
   bool _checkValidation() {
-    if (_selectedCurrent == "할일") {
+    if (_selectedCurrent == "todo") {
       return true;
     }
-    if (_selectedCurrent == "게임" &&
+    if (_selectedCurrent == "game" &&
         (_mainGames.contains(_selectedGame) || _selectedGame != null)) {
       return true;
     }
     return false;
   }
 
-  void _submitServer() {
-    final WebSocketProvider webSocketProvider =
-        Provider.of<WebSocketProvider>(context, listen: false);
-    Map<String, dynamic> data = {
-      'type': 'current',
-      'option': {
-        'select': _selectedCurrent,
+  void _submitServer() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    User? user = userProvider.user;
+    if (user == null) {
+      print('No user is signed in.');
+      return;
+    }
+    final token = await user.getIdToken();
+
+    final currentData = {
+      'current': {
+        'display': _selectedCurrent,
         'date': _selectedDate.toIso8601String(),
-        'game': _selectedGame,
-      }
+      },
     };
-    webSocketProvider.sendMessage(data);
-    Navigator.pop(context);
+
+    final serverUrl = dotenv.env['SERVER_URL']!;
+    if (serverUrl == null) {
+      print('SERVER_URL is not defined in env file.');
+      return;
+    }
+    final postResponse = await http.post(
+      Uri.parse('$serverUrl/controller/current'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(currentData),
+    );
+
+    if (postResponse.statusCode == 200) {
+      print('Data posted successfully: ${postResponse.body}');
+      _showModal('Success', 'Data posted successfully.');
+    } else {
+      print('Failed to post data. Status code: ${postResponse.statusCode}');
+      _showModal('Error', 'Failed to post data. Status code: ${postResponse.statusCode}');
+    }
   }
+
+  void _showModal(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async {
+            if (title == 'Success') {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              return true;
+            }
+            return true;
+          },
+          child: AlertDialog(
+            title: Text(title),
+            content: Text(content),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  if (title == 'Success') {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
 }
