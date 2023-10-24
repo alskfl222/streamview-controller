@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:streamview_controller/main.dart';
+import 'provider/page.dart';
 import 'provider/user.dart';
+import 'route/route.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -18,16 +19,15 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
+    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status == Status.authenticated) {
-      context
-          .read<StreamViewRouterDelegate>()
-          .setNewRoutePath(StreamViewRoute.landing());
+      pageProvider.changePage(page: PageName.landing, uid: null, unknown: false);
     }
   }
 
   Future<void> _performLogin(BuildContext context) async {
-    final routerDelegate = context.read<StreamViewRouterDelegate>();
+    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     String result = await userProvider.signIn(
@@ -36,7 +36,7 @@ class _LoginState extends State<Login> {
       message = result;
     });
     if (result == '로그인 성공') {
-      routerDelegate.setNewRoutePath(StreamViewRoute.landing());
+      pageProvider.changePage(page: PageName.landing, uid: null, unknown: false);
     }
   }
 

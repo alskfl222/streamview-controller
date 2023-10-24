@@ -4,9 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'provider/page.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
-import 'package:streamview_controller/main.dart';
+import 'route/route.dart';
 import 'current/container.dart';
 import 'todo/container.dart';
 
@@ -57,17 +58,17 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   void initState() {
+    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status != Status.authenticated) {
-      context
-          .read<StreamViewRouterDelegate>()
-          .setNewRoutePath(StreamViewRoute.landing());
+      pageProvider.changePage(page: PageName.login, uid: null, unknown: false);
     }
     fetchInitialData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final pageProvider = Provider.of<PageProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
     String userName = userProvider.user != null
@@ -95,9 +96,8 @@ class _LandingPageState extends State<LandingPage> {
               if (!context.mounted) {
                 return;
               }
-              context
-                  .read<StreamViewRouterDelegate>()
-                  .setNewRoutePath(StreamViewRoute.login());
+              pageProvider.changePage(
+                  page: PageName.login, uid: null, unknown: false);
             },
             icon: const Icon(Icons.logout),
           )
