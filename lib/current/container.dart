@@ -99,7 +99,6 @@ class _CurrentTabState extends State<CurrentTab> {
   Future<void> _launchViewer() async {
     final UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     final uid = userProvider.user!.uid;
-    Navigator.pushNamed(context, '/viewer/$uid');
     // final fullUrl = Uri.base.resolveUri(Uri(path: '/viewer/$uid'));
     //
     // if (!await launchUrl(fullUrl)) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
+import 'package:streamview_controller/main.dart';
 import 'provider/user.dart';
 
 class Login extends StatefulWidget {
@@ -20,21 +20,23 @@ class _LoginState extends State<Login> {
   void initState() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status == Status.authenticated) {
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/');
-      });
+      context
+          .read<StreamViewRouterDelegate>()
+          .setNewRoutePath(StreamViewRoute.landing());
     }
   }
 
   Future<void> _performLogin(BuildContext context) async {
+    final routerDelegate = context.read<StreamViewRouterDelegate>();
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     String result = await userProvider.signIn(
         _emailController.text, _passwordController.text);
     setState(() {
       message = result;
     });
     if (result == '로그인 성공') {
-      Navigator.of(context).pushReplacementNamed('/');
+      routerDelegate.setNewRoutePath(StreamViewRoute.landing());
     }
   }
 

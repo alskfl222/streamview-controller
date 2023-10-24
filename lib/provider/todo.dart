@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'user.dart';
-import 'websocket.dart';
 
 class TodoItem {
   final String id;
@@ -42,13 +40,8 @@ class TodoItem {
 }
 
 class TodoProvider with ChangeNotifier {
-  late BuildContext _context;
   DateTime _date = DateTime.now();
   final List<TodoItem> _todos = [];
-
-  TodoProvider(BuildContext context) {
-    _context = context;
-  }
 
   DateTime get date => _date;
 
@@ -73,16 +66,6 @@ class TodoProvider with ChangeNotifier {
   }
 
   void sendTodos() {
-    final websocketProvider =
-        Provider.of<WebSocketProvider>(_context, listen: false);
-    final userProvider = Provider.of<UserProvider>(_context, listen: false);
-    print(userProvider.user?.email);
-    print("Sending data to server: ${_todos[0]}");
-    Map<String, dynamic> data = {
-      'type': 'todo',
-      'date': _date.toIso8601String(),
-      'todos': _todos.map((todo) => todo.toJson()).toList(),
-    };
-    websocketProvider.sendMessage(data);
+
   }
 }

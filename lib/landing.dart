@@ -1,15 +1,14 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'todo/container.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
+import 'package:streamview_controller/main.dart';
 import 'current/container.dart';
+import 'todo/container.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -35,7 +34,7 @@ class _LandingPageState extends State<LandingPage> {
     if (user != null) {
       final token = await user.getIdToken();
       final response = await http.get(
-        Uri.parse('http://localhost:5005/controller'),
+        Uri.parse('$serverUrl/controller'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -60,9 +59,9 @@ class _LandingPageState extends State<LandingPage> {
   void initState() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status != Status.authenticated) {
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/login');
-      });
+      context
+          .read<StreamViewRouterDelegate>()
+          .setNewRoutePath(StreamViewRoute.landing());
     }
     fetchInitialData();
   }
@@ -96,7 +95,9 @@ class _LandingPageState extends State<LandingPage> {
               if (!context.mounted) {
                 return;
               }
-              Navigator.pushNamed(context, '/login');
+              context
+                  .read<StreamViewRouterDelegate>()
+                  .setNewRoutePath(StreamViewRoute.login());
             },
             icon: const Icon(Icons.logout),
           )

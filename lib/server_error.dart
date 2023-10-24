@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class ServerErrorPage extends StatelessWidget {
   final String errorMessage;
 
-  const ServerErrorPage({Key? key, required this.errorMessage}) : super(key: key);
+  const ServerErrorPage({Key? key, required this.errorMessage})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +42,7 @@ class ServerErrorPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                onPressed: () {
-                  // 다시 메인 화면으로 돌아가기 또는 웹소켓 연결 재시도 로직 구현
-                  Navigator.of(context).pop();
-                },
+                onPressed: () {},
                 child: const Text("다시 시도"),
               ),
             ),
