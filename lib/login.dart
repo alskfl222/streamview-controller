@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'user.dart';
+import 'provider/user.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,18 +16,21 @@ class _LoginState extends State<Login> {
   bool _obscureText = true;
   String message = '';
 
-  Future<void> _performLogin() async {
+  Future<void> _performLogin(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     String result = await userProvider.signIn(
         _emailController.text, _passwordController.text);
     setState(() {
       message = result;
     });
+    if (result == '로그인 성공') {
+      context.go('/');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text("로그인"),
@@ -66,7 +70,7 @@ class _LoginState extends State<Login> {
                         },
                       ),
                     ),
-                    onSubmitted: (value) => _performLogin(),
+                    onSubmitted: (value) => _performLogin(context),
                   )),
               const SizedBox(height: 32),
               Row(
@@ -91,7 +95,7 @@ class _LoginState extends State<Login> {
                   //     )),
                   // const SizedBox(width: 16),
                   ElevatedButton(
-                      onPressed: _performLogin,
+                      onPressed: () => _performLogin(context),
                       child: const Padding(
                         padding: EdgeInsets.all(8),
                         child: Text('로그인',
