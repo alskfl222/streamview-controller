@@ -1,8 +1,8 @@
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:streamview_controller/provider/user.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:streamview_controller/provider/current.dart';
 import 'package:streamview_controller/util.dart';
 import 'options.dart';
@@ -99,10 +99,6 @@ class _CurrentTabState extends State<CurrentTab> {
   Future<void> _launchViewer() async {
     final UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     final uid = userProvider.user!.uid;
-    // final fullUrl = Uri.base.resolveUri(Uri(path: '/viewer/$uid'));
-    //
-    // if (!await launchUrl(fullUrl)) {
-    //   throw Exception('Could not launch $fullUrl');
-    // }
+    html.window.open('/view?uid=$uid', '_blank', 'popup');
   }
 }

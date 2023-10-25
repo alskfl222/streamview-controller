@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'provider/page.dart';
 import 'provider/user.dart';
-import 'route/route.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -19,15 +18,13 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
-    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status == Status.authenticated) {
-      pageProvider.changePage(page: PageName.landing, uid: null, unknown: false);
+      context.go('/');
     }
   }
 
   Future<void> _performLogin(BuildContext context) async {
-    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     String result = await userProvider.signIn(
@@ -36,7 +33,7 @@ class _LoginState extends State<Login> {
       message = result;
     });
     if (result == '로그인 성공') {
-      pageProvider.changePage(page: PageName.landing, uid: null, unknown: false);
+      context.go('/');
     }
   }
 

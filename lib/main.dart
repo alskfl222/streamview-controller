@@ -4,12 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'firebase_options.dart';
-import 'provider/page.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
 import 'provider/todo.dart';
-import 'route/router_delegate.dart';
-import 'route/route_info_parser.dart';
+import 'route/router.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,16 +20,9 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => PageProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => CurrentDataProvider()),
         ChangeNotifierProvider(create: (context) => TodoProvider()),
-        ChangeNotifierProxyProvider<PageProvider, StreamViewRouterDelegate>(
-          create: (context) => StreamViewRouterDelegate(
-              notifier: Provider.of<PageProvider>(context, listen: false)),
-          update: (context, pageNotifier, previous) =>
-              StreamViewRouterDelegate(notifier: pageNotifier),
-        ),
       ],
       child: const StreamViewController(),
     ),
@@ -49,9 +41,7 @@ class StreamViewControllerState extends State<StreamViewController> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: "StreamView Controller",
-      routeInformationParser: StreamViewRouterInformationParser(),
-      routerDelegate:
-          Provider.of<StreamViewRouterDelegate>(context, listen: false),
+      routerConfig: routerConfig,
     );
   }
 }

@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'provider/page.dart';
 import 'provider/user.dart';
 import 'provider/current.dart';
-import 'route/route.dart';
 import 'current/container.dart';
 import 'todo/container.dart';
 
@@ -58,17 +57,16 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   void initState() {
-    final pageProvider = Provider.of<PageProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.status != Status.authenticated) {
-      pageProvider.changePage(page: PageName.login, uid: null, unknown: false);
+      context.go('/login');
+      return;
     }
     fetchInitialData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final pageProvider = Provider.of<PageProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
     String userName = userProvider.user != null
@@ -96,8 +94,7 @@ class _LandingPageState extends State<LandingPage> {
               if (!context.mounted) {
                 return;
               }
-              pageProvider.changePage(
-                  page: PageName.login, uid: null, unknown: false);
+              context.go('/login');
             },
             icon: const Icon(Icons.logout),
           )
@@ -122,7 +119,7 @@ class _LandingPageState extends State<LandingPage> {
                 setState(() {
                   _selectedTabIndex = 0;
                 });
-                Navigator.pop(context); // 햄버거 메뉴 닫기
+                Navigator.pop(context);
               },
             ),
             ListTile(
