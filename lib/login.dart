@@ -16,14 +16,6 @@ class _LoginState extends State<Login> {
   bool _obscureText = true;
   String message = '';
 
-  @override
-  void initState() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (userProvider.status == Status.authenticated) {
-      context.go('/');
-    }
-  }
-
   Future<void> _performLogin(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
