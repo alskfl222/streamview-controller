@@ -19,8 +19,8 @@ class TodoItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8.0),
-              Text("종류: ${todo.taskType}"),
-              if (todo.taskType == "게임") Text("게임: ${todo.game}"),
+              Text("종류: ${todo.type}"),
+              Text("${todo.type}: ${todo.kind}"),
             ],
           ),
           trailing: Row(
@@ -51,7 +51,8 @@ class TodoItemWidget extends StatelessWidget {
               title: Text('Activity: ${todo.activity}'),
             ),
             ListTile(
-              title: Text('Character: ${todo.character}'),
+              title: Text(
+                  'Character: ${todo.activity != null ? todo.activity!['character'] ?? '캐릭터 없음' : '활동 없음'}'),
             ),
             ListTile(
               title: Text('Description: ${todo.description}'),

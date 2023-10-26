@@ -1,46 +1,46 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'user.dart';
 
 class TodoItem {
   final String id;
-  final String description;
-  final String taskType;
-  final String? game;
-  final String? activity;
-  final String? character;
+  final String type;
+  final String kind;
+  Map<String, String?>? activity;
   final String addedTime;
   String? plannedStartTime;
   String? actualStartTime;
+  String? endTime;
+  String? description;
 
   TodoItem({
     required this.id,
-    required this.description,
-    required this.taskType,
-    required this.addedTime,
-    this.game,
+    required this.type,
+    required this.kind,
     this.activity,
-    this.character,
+    required this.addedTime,
     this.plannedStartTime,
     this.actualStartTime,
+    this.endTime,
+    this.description,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'description': description,
-      'taskType': taskType,
-      'game': game,
-      'activity': activity,
-      'character': character,
-      'addedTime': addedTime,
-      'plannedStartTime': plannedStartTime,
-      'actualStartTime': actualStartTime,
-    };
+  String toJson() {
+    return jsonEncode({
+      id: id,
+      type: type,
+      kind: kind,
+      activity: jsonEncode(activity),
+      addedTime: addedTime,
+      plannedStartTime: plannedStartTime,
+      actualStartTime: actualStartTime,
+    });
   }
 }
 
 class TodoProvider with ChangeNotifier {
-  DateTime _date = DateTime.now();
+  DateTime _date =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final List<TodoItem> _todos = [];
 
   DateTime get date => _date;
@@ -53,6 +53,7 @@ class TodoProvider with ChangeNotifier {
 
   void addTodo(TodoItem todo) {
     _todos.add(todo);
+    print(_todos);
     notifyListeners();
   }
 
@@ -65,7 +66,5 @@ class TodoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void sendTodos() {
-
-  }
+  void sendTodos() {}
 }
