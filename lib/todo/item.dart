@@ -47,16 +47,15 @@ class TodoItemWidget extends StatelessWidget {
             ],
           ),
           children: [
-            ListTile(
-              title: Text('Activity: ${todo.activity}'),
-            ),
-            ListTile(
-              title: Text(
-                  'Character: ${todo.activity != null ? todo.activity!['character'] ?? '캐릭터 없음' : '활동 없음'}'),
-            ),
-            ListTile(
-              title: Text('Description: ${todo.description}'),
-            ),
+            if (todo.activity != null) ...[
+              ListTile(
+                title: Text('Activity: ${todo.activity}'),
+              ),
+              if (todo.activity!['character'] != null)
+                ListTile(
+                  title: Text('Character: ${todo.activity!['character']}'),
+                ),
+            ],
             ListTile(
               title: Text('Added Time: ${todo.addedTime}'),
             ),

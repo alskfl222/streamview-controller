@@ -11,7 +11,6 @@ class TodoItem {
   String? plannedStartTime;
   String? actualStartTime;
   String? endTime;
-  String? description;
 
   TodoItem({
     required this.id,
@@ -22,7 +21,6 @@ class TodoItem {
     this.plannedStartTime,
     this.actualStartTime,
     this.endTime,
-    this.description,
   });
 
   String toJson() {
@@ -66,5 +64,5 @@ class TodoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void sendTodos() {}
+
 }

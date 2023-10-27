@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../provider/user.dart';
 import '../provider/todo.dart';
 import 'list.dart';
 import 'input/container.dart';
@@ -58,11 +59,31 @@ class _TodoListState extends State<TodoList> {
           ),
           const TodoListWidget(),
           ElevatedButton(
-            onPressed: todoProvider.sendTodos,
+            onPressed: _sendTodos,
             child: const Text("Save"),
           ),
         ],
       ),
     );
+  }
+
+  void _sendTodos() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    User? user = userProvider.user;
+    if (user == null) {
+      print('No user is signed in.');
+      return;
+    }
+    final token = await user.getIdToken();
+
+    final currentData = {
+      'current': {
+        'display': _selectedCurrent,
+        'date': _selectedDate.toIso8601String(),
+      },
+    };
+
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
   }
 }

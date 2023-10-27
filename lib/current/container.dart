@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:streamview_controller/provider/user.dart';
 import 'package:streamview_controller/provider/current.dart';
-import 'package:streamview_controller/util.dart';
+import 'package:streamview_controller/util/constant.dart';
 import 'options.dart';
 
 class CurrentTab extends StatefulWidget {
