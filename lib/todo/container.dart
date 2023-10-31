@@ -1,9 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../provider/user.dart';
 import '../provider/todo.dart';
 import 'list.dart';
 import 'input/container.dart';
+import '../util/modal.dart';
 
 class TodoList extends StatefulWidget {
   const TodoList({super.key});
@@ -13,6 +19,48 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  @override
+  void initState() {
+    _fetchInitTodo();
+  }
+
+  void _fetchInitTodo() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
+    User? user = userProvider.user;
+    if (user == null) {
+      print('No user is signed in.');
+      return;
+    }
+    final token = await user.getIdToken();
+
+    final serverUrl = dotenv.env['SERVER_URL'];
+    if (serverUrl == null) {
+      print('SERVER_URL is not defined in env file.');
+      return;
+    }
+    final String formattedDate =
+        DateFormat('yyyy-MM-dd').format(todoProvider.date);
+    final response = await http.get(
+      Uri.parse('$serverUrl/controller/todo?date=$formattedDate'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+      if (data['todos'] != null) {
+        todoProvider.setTodos(data['todos']);
+      }
+      print('Data fetched successfully: ${response.body}');
+    } else {
+      print('Failed to fetch data. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     TodoProvider todoProvider =
@@ -67,8 +115,10 @@ class _TodoListState extends State<TodoList> {
     );
   }
 
-  void _sendTodos() {
+  void _sendTodos() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
     User? user = userProvider.user;
     if (user == null) {
       print('No user is signed in.');
@@ -76,14 +126,31 @@ class _TodoListState extends State<TodoList> {
     }
     final token = await user.getIdToken();
 
-    final currentData = {
-      'current': {
-        'display': _selectedCurrent,
-        'date': _selectedDate.toIso8601String(),
-      },
-    };
+    final todoData = todoProvider.todoData;
+    print(todoData);
 
-    TodoProvider todoProvider =
-        Provider.of<TodoProvider>(context, listen: false);
+    final serverUrl = dotenv.env['SERVER_URL']!;
+    if (serverUrl == null) {
+      print('SERVER_URL is not defined in env file.');
+      return;
+    }
+    final postResponse = await http.post(
+      Uri.parse('$serverUrl/controller/todo'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(todoData),
+    );
+
+    if (postResponse.statusCode == 200) {
+      print('Data posted successfully: ${postResponse.body}');
+      showModal(context, 'Success', 'Data posted successfully.');
+    } else {
+      print('Failed to post data. Status code: ${postResponse.statusCode}');
+      print('Response body: ${postResponse.body}');
+      showModal(context, 'Error',
+          'Failed to post data. Status code: ${postResponse.statusCode}');
+    }
   }
 }

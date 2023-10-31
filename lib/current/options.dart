@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../provider/user.dart';
 import 'current_button.dart';
+import '../util/modal.dart';
 
 class Options extends StatefulWidget {
   const Options({super.key});
@@ -179,43 +180,13 @@ class _OptionsState extends State<Options> {
 
     if (postResponse.statusCode == 200) {
       print('Data posted successfully: ${postResponse.body}');
-      _showModal('Success', 'Data posted successfully.');
+      showModal(context, 'Success', 'Data posted successfully.');
     } else {
       print('Failed to post data. Status code: ${postResponse.statusCode}');
-      _showModal('Error', 'Failed to post data. Status code: ${postResponse.statusCode}');
+      showModal(context, 'Error', 'Failed to post data. Status code: ${postResponse.statusCode}');
     }
   }
 
-  void _showModal(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async {
-            if (title == 'Success') {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              return true;
-            }
-            return true;
-          },
-          child: AlertDialog(
-            title: Text(title),
-            content: Text(content),
-            actions: <Widget>[
-              ElevatedButton(
-                child: const Text('Close'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  if (title == 'Success') {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+
 
 }
