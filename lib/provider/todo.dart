@@ -120,6 +120,11 @@ class TodoProvider with ChangeNotifier {
     exitEditMode();
   }
 
+  void deleteTodo(String todoId) {
+    _todos.removeWhere((todo) => todo.id == todoId);
+    notifyListeners();
+  }
+
   void onReorder(int oldIndex, int newIndex) {
     if (newIndex > oldIndex) {
       newIndex -= 1;

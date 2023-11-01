@@ -32,16 +32,8 @@ class TodoItemWidget extends StatelessWidget {
                 onPressed: () => _onPressedEdit(context, todo),
               ),
               IconButton(
-                icon: const Icon(Icons.check),
-                onPressed: () {
-                  // 확인 로직
-                },
-              ),
-              IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () {
-                  // 삭제 로직
-                },
+                onPressed: () => _onPressedDelete(context, todo),
               ),
             ],
           ),
@@ -74,5 +66,9 @@ class TodoItemWidget extends StatelessWidget {
 
   void _onPressedEdit(BuildContext context, TodoItem todo) {
     Provider.of<TodoProvider>(context, listen: false).enterEditMode(todo);
+  }
+
+  void _onPressedDelete(BuildContext context, TodoItem todo) {
+    Provider.of<TodoProvider>(context, listen: false).deleteTodo(todo.id);
   }
 }

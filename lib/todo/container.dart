@@ -21,11 +21,6 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   DateTime? _date;
 
-  // @override
-  // void initState() {
-  //   _fetchInitTodo();
-  // }
-
   @override
   void didChangeDependencies() {
     final todoProvider = Provider.of<TodoProvider>(context);
