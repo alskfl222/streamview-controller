@@ -19,9 +19,19 @@ class TodoList extends StatefulWidget {
 }
 
 class _TodoListState extends State<TodoList> {
+  DateTime? _date;
+
+  // @override
+  // void initState() {
+  //   _fetchInitTodo();
+  // }
+
   @override
-  void initState() {
-    _fetchInitTodo();
+  void didChangeDependencies() {
+    final todoProvider = Provider.of<TodoProvider>(context);
+    if (_date != todoProvider.date) {
+      _fetchInitTodo();
+    }
   }
 
   void _fetchInitTodo() async {
@@ -54,6 +64,14 @@ class _TodoListState extends State<TodoList> {
       if (data['todos'] != null) {
         todoProvider.setTodos(data['todos']);
       }
+      if (data['date'] != null) {
+        String dateString = data['date'];
+        DateFormat format = DateFormat('yyyy-MM-dd');
+        DateTime newDate = format.parse(dateString);
+        setState(() {
+          _date = newDate;
+        });
+      }
       print('Data fetched successfully: ${response.body}');
     } else {
       print('Failed to fetch data. Status code: ${response.statusCode}');
@@ -63,9 +81,8 @@ class _TodoListState extends State<TodoList> {
 
   @override
   Widget build(BuildContext context) {
-    TodoProvider todoProvider =
-        Provider.of<TodoProvider>(context, listen: false);
-    DateTime date = todoProvider.date;
+    // TodoProvider todoProvider = Provider.of<TodoProvider>(context);
+    // DateTime date = todoProvider.date;
     return Scaffold(
       body: Column(
         children: [
@@ -77,7 +94,9 @@ class _TodoListState extends State<TodoList> {
                   children: [
                     Expanded(
                       child: Text(
-                        "${date.toLocal()}".split(' ')[0],
+                        _date != null
+                            ? "${_date?.toLocal()}".split(' ')[0]
+                            : "불러오는 중",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -86,18 +105,7 @@ class _TodoListState extends State<TodoList> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.calendar_today),
-                      onPressed: () async {
-                        final DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: date,
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (pickedDate != null && pickedDate != date) {
-                          todoProvider.changeDate(pickedDate);
-                        }
-                      },
+                      onPressed: _onPressChangeDate,
                     ),
                   ],
                 ),
@@ -113,6 +121,22 @@ class _TodoListState extends State<TodoList> {
         ],
       ),
     );
+  }
+
+  void _onPressChangeDate() async {
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
+    DateTime date = todoProvider.date;
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (pickedDate != null && pickedDate != date) {
+      print(pickedDate);
+      todoProvider.changeDate(pickedDate);
+    }
   }
 
   void _sendTodos() async {

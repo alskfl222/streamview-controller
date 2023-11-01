@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../provider/todo.dart';
 
 class TodoItemWidget extends StatelessWidget {
@@ -28,9 +29,7 @@ class TodoItemWidget extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () {
-                  // 수정 로직
-                },
+                onPressed: () => _onPressedEdit(context, todo),
               ),
               IconButton(
                 icon: const Icon(Icons.check),
@@ -71,5 +70,9 @@ class TodoItemWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _onPressedEdit(BuildContext context, TodoItem todo) {
+    Provider.of<TodoProvider>(context, listen: false).enterEditMode(todo);
   }
 }

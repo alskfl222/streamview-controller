@@ -24,7 +24,18 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
   late Map<String, dynamic> _selected = _initialTodo;
 
   @override
+  void didChangeDependencies() {
+    final todoProvider = Provider.of<TodoProvider>(context);
+    if (todoProvider.isEditMode && todoProvider.editingTodo != null) {
+      _selected = {
+        ...todoProvider.editingTodo!.toMap(),
+      };
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final todoProvider = Provider.of<TodoProvider>(context);
     Map<String, Widget> activityWidgets = {
       "메이플스토리": MaplestoryActivityWidget(
         selected: _selected,
@@ -125,11 +136,9 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                         icon: const Icon(Icons.access_time),
                         onPressed: _selectPlannedStartTime,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          _handleAddTodo();
-                        },
+                      ElevatedButton(
+                        onPressed: _handleAddTodo,
+                        child: Text(todoProvider.isEditMode ? "Update" : "Add"),
                       ),
                     ],
                   ),
@@ -157,24 +166,36 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     }
   }
 
-  void _resetInputState() {
-    _selected = _initialTodo;
-  }
-
   void _handleAddTodo() {
-    TodoProvider todoProvider =
-        Provider.of<TodoProvider>(context, listen: false);
+    TodoProvider todoProvider = Provider.of<TodoProvider>(context, listen: false);
+
     if (_selected['type'] != null) {
       final todoItem = TodoItem(
-        id: DateTime.now().toIso8601String(),
+        id: todoProvider.isEditMode
+            ? _selected['id'] // 수정 모드인 경우 기존 ID를 사용
+            : DateTime.now().toIso8601String(), // 추가 모드인 경우 새 ID 생성
         type: _selected['type'],
         kind: _selected['kind'],
         activity: _selected['activity'],
         addedTime: DateTime.now().toIso8601String(),
         plannedStartTime: _selected['plannedStartTime'],
       );
-      todoProvider.addTodo(todoItem);
+
+      if (todoProvider.isEditMode) {
+        todoProvider.updateTodo(todoItem);
+      } else {
+        todoProvider.addTodo(todoItem);
+      }
+
       _resetInputState();
     }
   }
+
+  void _resetInputState() {
+    setState(() {
+      _selected = _initialTodo;
+      _activityController.clear();
+    });
+  }
+
 }

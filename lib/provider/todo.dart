@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 class TodoItem {
@@ -28,8 +26,7 @@ class TodoItem {
       id: json['id'] as String,
       type: json['type'] as String,
       kind: json['kind'] as String,
-      activity: (json['activity'] as Map<String, dynamic>?)
-          ?.map((key, value) => MapEntry(key, value as String?)),
+      activity: _decodeMap(json['activity'] as Map<String, dynamic>?),
       addedTime: json['addedTime'] as String,
       plannedStartTime: json['plannedStartTime'] as String?,
       actualStartTime: json['actualStartTime'] as String?,
@@ -37,7 +34,7 @@ class TodoItem {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
       'type': type,
@@ -56,6 +53,10 @@ class TodoItem {
       result[key] = value ?? 'null'; // null 값을 'null' 문자열로 변환
     });
     return result;
+  }
+
+  static Map<String, String?>? _decodeMap(Map<String, dynamic>? json) {
+    return json?.map((key, value) => MapEntry(key, value?.toString()));
   }
 }
 
@@ -76,7 +77,7 @@ class TodoProvider with ChangeNotifier {
 
   Map<String, dynamic> get todoData => {
         'date': _date.toIso8601String(),
-        'todos': _todos.map((todo) => todo.toJson()).toList(),
+        'todos': _todos.map((todo) => todo.toMap()).toList(),
       };
 
   void enterEditMode(TodoItem todoItem) {
@@ -98,6 +99,8 @@ class TodoProvider with ChangeNotifier {
 
   void changeDate(DateTime newDate) {
     _date = newDate;
+    notifyListeners();
+    print("changeDate");
   }
 
   void addTodo(TodoItem todo) {
@@ -106,9 +109,14 @@ class TodoProvider with ChangeNotifier {
   }
 
   void updateTodo(TodoItem updatedTodo) {
-    // 할 일 업데이트 로직
-    // ...
-
+    int index = _todos.indexWhere((todo) => todo.id == updatedTodo.id);
+    if (index != -1) {
+      print("수정 인덱스: $index");
+      _todos[index] = updatedTodo;
+      notifyListeners();
+    } else {
+      print("기존 할일을 찾지 못함");
+    }
     exitEditMode();
   }
 
