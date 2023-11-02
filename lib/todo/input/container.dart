@@ -11,6 +11,7 @@ class TodoInputWidget extends StatefulWidget {
 }
 
 class _TodoInputWidgetState extends State<TodoInputWidget> {
+  final TextEditingController _otherGameController = TextEditingController();
   final TextEditingController _activityController = TextEditingController();
   final Map<String, dynamic> _initialTodo = {
     'type': null, // 게임, 다른 할일, ...
@@ -22,22 +23,19 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     'endTime': null, // 할일 마무리 시간
   };
   late Map<String, dynamic> _selected = _initialTodo;
-  List<String> _otherKinds = [];
-  String _otherKind = '';
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     final todoProvider = Provider.of<TodoProvider>(context);
     if (todoProvider.isEditMode && todoProvider.editingTodo != null) {
       _selected = {
         ...todoProvider.editingTodo!.toMap(),
       };
     }
-    if (_selected['type'] == '게임' &&
-        !['메이플스토리', '다른 게임'].contains(_selected['kind'])) {
-      setState(() {
-        _otherKinds = [..._otherKinds, _selected['kind']];
-      });
+    if (_selected['kind'] == '다른 게임' &&
+        !todoProvider.gameKinds.contains(_selected['kind'])) {
+      todoProvider.addGameKind(_selected['kind']);
     }
   }
 
@@ -56,14 +54,10 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
       ),
       "다른 게임": Flexible(
         child: TextField(
+          controller: _otherGameController,
           decoration: const InputDecoration(
             labelText: '다른 게임 이름',
           ),
-          onChanged: (value) {
-            setState(() {
-              _otherKind = value;
-            });
-          },
         ),
       ),
     };
@@ -74,74 +68,71 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
       ),
       child: Column(
         children: [
-          Column(
-            children: [
-              Row(children: [
-                DropdownButton<String>(
-                  value: _selected['type'],
-                  items: ['게임', '다른 할일']
-                      .map<DropdownMenuItem<String>>((String value) {
+          Row(children: [
+            DropdownButton<String>(
+              value: _selected['type'],
+              items:
+                  ['게임', '다른 할일'].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selected = {
+                    ..._initialTodo,
+                    'type': newValue,
+                  };
+                });
+              },
+              hint: const Text("할일 종류 선택"),
+            ),
+            if (_selected['type'] == '게임') ...[
+              const SizedBox(
+                width: 16,
+              ),
+              DropdownButton<String>(
+                value: _selected['kind'],
+                items: [
+                  ...todoProvider.gameKinds.map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selected = {
-                        ..._initialTodo,
-                        'type': newValue,
-                      };
-                    });
-                  },
-                  hint: const Text("할일 종류 선택"),
-                ),
-                if (_selected['type'] == '게임') ...[
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  DropdownButton<String>(
-                    value: _selected['kind'] != null &&
-                            ['메이플스토리', ..._otherKinds, '다른 게임']
-                                .contains(_selected['kind'])
-                        ? _selected['kind']
-                        : null,
-                    items: ['메이플스토리', ..._otherKinds, '다른 게임']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selected = {
-                          ..._initialTodo,
-                          'type': _selected['type'],
-                          'kind': newValue,
-                        };
-                      });
-                    },
-                    hint: const Text("게임 종류 선택"),
+                  const DropdownMenuItem<String>(
+                    value: '다른 게임',
+                    child: Text('다른 게임'),
                   ),
                 ],
-                if (_selected['type'] == '다른 할일')
-                  SizedBox(
-                    width: 200,
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: '할일 입력',
-                      ),
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selected['kind'] = newValue;
-                        });
-                      },
-                    ),
-                  ),
-              ]),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selected = {
+                      ..._initialTodo,
+                      'type': _selected['type'],
+                      'kind': newValue,
+                    };
+                  });
+                },
+                hint: const Text("게임 종류 선택"),
+              ),
             ],
-          ),
+            if (_selected['type'] == '다른 할일')
+              SizedBox(
+                width: 200,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: '할일 입력',
+                  ),
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selected['kind'] = newValue;
+                    });
+                  },
+                ),
+              ),
+          ]),
           if (_selected['type'] == '다른 할일' && _selected['kind'] != null ||
               _selected['type'] == '게임' && _selected['kind'] != null)
             Row(
@@ -149,7 +140,8 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (_selected['type'] == '게임')
-                    activityWidgets[_selected['kind']]!
+                    activityWidgets[_selected['kind']] ??
+                        activityWidgets['다른 게임']!
                   else if (_selected['type'] == '다른 할일')
                     const SizedBox(
                       width: 100,
@@ -200,18 +192,20 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
             : DateTime.now().toIso8601String(),
         // 추가 모드인 경우 새 ID 생성
         type: _selected['type'],
-        kind: _selected['kind'] != "다른 게임" ? _selected['kind'] : _otherKind,
+        kind: _otherGameController.text.isNotEmpty &&
+                !todoProvider.gameKinds.contains(_otherGameController.text)
+            ? _otherGameController.text
+            : _selected['kind'],
         activity: _selected['activity'],
         addedTime: DateTime.now().toIso8601String(),
         plannedStartTime: _selected['plannedStartTime'],
       );
-      if (_selected['kind'] == "다른 게임") {
-        setState(() {
-          _otherKinds = [..._otherKinds, _otherKind];
-          print(_otherKinds);
-          print(['메이플스토리', ..._otherKinds, '다른 게임']);
-        });
+
+      if (!todoProvider.gameKinds.contains(_otherGameController.text) &&
+          _otherGameController.text.isNotEmpty) {
+        todoProvider.addGameKind(_otherGameController.text);
       }
+
       if (todoProvider.isEditMode) {
         todoProvider.updateTodo(todoItem);
       } else {
@@ -225,6 +219,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
   void _resetInputState() {
     setState(() {
       _selected = _initialTodo;
+      _otherGameController.clear();
       _activityController.clear();
     });
   }

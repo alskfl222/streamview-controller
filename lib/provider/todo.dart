@@ -66,6 +66,8 @@ class TodoProvider with ChangeNotifier {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   List<TodoItem> _todos = [];
   TodoItem? _editingTodo;
+  final List<String> _defaultGameKinds = ["메이플스토리"];
+  final List<String> _addedGameKinds = [];
 
   bool get isEditMode => _isEditMode;
 
@@ -74,6 +76,9 @@ class TodoProvider with ChangeNotifier {
   List<TodoItem> get todos => _todos;
 
   TodoItem? get editingTodo => _editingTodo;
+
+  List<String> get gameKinds =>
+      List.from(_defaultGameKinds)..addAll(_addedGameKinds);
 
   Map<String, dynamic> get todoData => {
         'date': _date.toIso8601String(),
@@ -93,7 +98,18 @@ class TodoProvider with ChangeNotifier {
   }
 
   void setTodos(List<dynamic> todosJson) {
-    _todos = todosJson.map((todoJson) => TodoItem.fromJson(todoJson)).toList();
+    _todos = todosJson.map((todoJson) {
+      final todo = TodoItem.fromJson(todoJson);
+      final kind = todo.kind;
+
+      if (todo.type == '게임' &&
+          !_defaultGameKinds.contains(kind) &&
+          !_addedGameKinds.contains(kind)) {
+        _addedGameKinds.add(kind);
+      }
+
+      return todo;
+    }).toList();
     notifyListeners();
   }
 
@@ -132,5 +148,13 @@ class TodoProvider with ChangeNotifier {
     final item = _todos.removeAt(oldIndex);
     _todos.insert(newIndex, item);
     notifyListeners();
+  }
+
+  void addGameKind(String newGameKind) {
+    if (!_defaultGameKinds.contains(newGameKind) &&
+        !_addedGameKinds.contains(newGameKind)) {
+      _addedGameKinds.add(newGameKind);
+      notifyListeners();
+    }
   }
 }

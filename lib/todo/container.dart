@@ -129,7 +129,6 @@ class _TodoListState extends State<TodoList> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (pickedDate != null && pickedDate != date) {
-      print(pickedDate);
       todoProvider.changeDate(pickedDate);
     }
   }
