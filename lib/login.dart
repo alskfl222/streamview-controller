@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'provider/user.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class LoginWidget extends StatefulWidget {
+  const LoginWidget({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<LoginWidget> createState() => _LoginWidgetState();
 }
 
-class _LoginState extends State<Login> {
+class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;

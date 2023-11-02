@@ -2,19 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'provider/user.dart';
-import 'current/container.dart';
-import 'todo/container.dart';
 
-class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key}) : super(key: key);
+class Layout extends StatelessWidget {
+  final Widget child;
 
-  @override
-  _LandingPageState createState() => _LandingPageState();
-}
-
-class _LandingPageState extends State<LandingPage> {
-  int _selectedTabIndex = 0;
-  final List<Widget> _tabs = [const CurrentTab(), const TodoList()];
+  const Layout({Key? key, required this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -67,25 +59,21 @@ class _LandingPageState extends State<LandingPage> {
             ListTile(
               title: const Text('현재'),
               onTap: () {
-                setState(() {
-                  _selectedTabIndex = 0;
-                });
+                context.go('/');
                 Navigator.pop(context);
               },
             ),
             ListTile(
               title: const Text('할일'),
               onTap: () {
-                setState(() {
-                  _selectedTabIndex = 1;
-                });
+                context.go('/todo');
                 Navigator.pop(context);
               },
             ),
           ],
         ),
       ),
-      body: _tabs[_selectedTabIndex],
+      body: child,
     );
   }
 }

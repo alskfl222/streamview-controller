@@ -12,14 +12,14 @@ import 'package:streamview_controller/provider/current.dart';
 import 'package:streamview_controller/util/constant.dart';
 import 'options.dart';
 
-class CurrentTab extends StatefulWidget {
-  const CurrentTab({super.key});
+class CurrentWidget extends StatefulWidget {
+  const CurrentWidget({super.key});
 
   @override
-  _CurrentTabState createState() => _CurrentTabState();
+  _CurrentWidgetState createState() => _CurrentWidgetState();
 }
 
-class _CurrentTabState extends State<CurrentTab> {
+class _CurrentWidgetState extends State<CurrentWidget> {
   @override
   void initState() {
     fetchInitialData();

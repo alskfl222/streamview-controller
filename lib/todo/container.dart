@@ -11,14 +11,14 @@ import 'list.dart';
 import 'input/container.dart';
 import '../util/modal.dart';
 
-class TodoList extends StatefulWidget {
-  const TodoList({super.key});
+class TodoWidget extends StatefulWidget {
+  const TodoWidget({super.key});
 
   @override
-  _TodoListState createState() => _TodoListState();
+  _TodoWidgetState createState() => _TodoWidgetState();
 }
 
-class _TodoListState extends State<TodoList> {
+class _TodoWidgetState extends State<TodoWidget> {
   DateTime? _date;
 
   @override
