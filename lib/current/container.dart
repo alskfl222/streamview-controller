@@ -146,6 +146,6 @@ class _CurrentWidgetState extends State<CurrentWidget> {
     final UserProvider userProvider =
         Provider.of<UserProvider>(context, listen: false);
     final uid = userProvider.user!.uid;
-    html.window.open('/view?uid=$uid', '_blank', 'popup');
+    html.window.open('/viewer/current?uid=$uid', '_blank', 'popup');
   }
 }
