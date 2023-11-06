@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TodoItem {
   final String id;
@@ -57,6 +58,54 @@ class TodoItem {
 
   static Map<String, String?>? _decodeMap(Map<String, dynamic>? json) {
     return json?.map((key, value) => MapEntry(key, value?.toString()));
+  }
+
+  Icon get statusIcon {
+    if (actualStartTime != null && endTime == null) {
+      // 실제 시작 시간은 있으나 끝나지 않았을 때
+      return const Icon(Icons.play_arrow, color: Colors.green);
+    } else if (endTime != null) {
+      // 작업이 끝났을 때
+      return const Icon(Icons.check_circle, color: Colors.blue);
+    } else if (plannedStartTime != null) {
+      // 예정된 작업
+      return const Icon(Icons.schedule, color: Colors.orange);
+    } else {
+      // 등록만 된 경우
+      return const Icon(Icons.circle, color: Colors.grey);
+    }
+  }
+
+  String get displayStatus {
+    final formatter = DateFormat('yyyy-MM-dd HH:mm');
+
+    String? formatTime(String? time) {
+      if (time != null) {
+        try {
+          final dateTime = DateTime.parse(time);
+          return formatter.format(dateTime);
+        } catch (e) {
+          return null; // 유효하지 않은 시간 형식인 경우 null을 반환
+        }
+      }
+      return null;
+    }
+
+    final formattedPlannedStartTime = formatTime(plannedStartTime);
+    final formattedActualStartTime = formatTime(actualStartTime);
+    final formattedEndTime = formatTime(endTime);
+    final formattedAddedTime = formatTime(addedTime);
+
+    if (formattedActualStartTime != null && formattedEndTime != null) {
+      return "시작: $formattedActualStartTime\n끝: $formattedEndTime";
+    } else if (formattedActualStartTime != null) {
+      return "시작: $formattedActualStartTime";
+    } else if (formattedPlannedStartTime != null) {
+      return "예정: $formattedPlannedStartTime";
+    } else {
+      // `addedTime`은 'required' 이므로 변환 오류가 있으면 원래의 문자열을 반환합니다.
+      return "등록: ${formattedAddedTime ?? addedTime}";
+    }
   }
 }
 

@@ -7,7 +7,7 @@ import '../login.dart';
 import '../layout.dart';
 import '../current/container.dart';
 import '../todo/container.dart';
-import '../viewer/current.dart';
+import '../viewer/todo.dart';
 import '../404.dart';
 
 final routerConfig = GoRouter(
@@ -60,11 +60,11 @@ final routerConfig = GoRouter(
       builder: (context, state) => const Layout(child: Placeholder()),
       routes: [
         GoRoute(
-          path: 'current',
+          path: 'todo',
           builder: (context, state) {
             final String date = state.uri.queryParameters['date'] ?? '';
             final String uid = state.uri.queryParameters['uid'] ?? '';
-            return CurrentViewerWidget(date: date, uid: uid);
+            return TodoViewerWidget(date: date, uid: uid);
           },
           redirect: (context, state) {
             final String? date = state.uri.queryParameters['date'];

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -102,6 +103,10 @@ class _TodoWidgetState extends State<TodoWidget> {
                       icon: const Icon(Icons.calendar_today),
                       onPressed: _onPressChangeDate,
                     ),
+                    IconButton(
+                      icon: const Icon(Icons.visibility),
+                      onPressed: _launchViewer,
+                    ),
                   ],
                 ),
                 const TodoInputWidget()
@@ -131,6 +136,17 @@ class _TodoWidgetState extends State<TodoWidget> {
     if (pickedDate != null && pickedDate != date) {
       todoProvider.changeDate(pickedDate);
     }
+  }
+
+  Future<void> _launchViewer() async {
+    final UserProvider userProvider =
+        Provider.of<UserProvider>(context, listen: false);
+    TodoProvider todoProvider =
+        Provider.of<TodoProvider>(context, listen: false);
+    final uid = userProvider.user!.uid;
+    final formattedDate = DateFormat('yyyy-MM-dd').format(todoProvider.date);
+    html.window.open(
+        '/viewer/todo?date=$formattedDate&uid=$uid', '_blank', 'popup');
   }
 
   void _sendTodos() async {

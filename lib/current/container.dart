@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -22,15 +21,16 @@ class CurrentWidget extends StatefulWidget {
 class _CurrentWidgetState extends State<CurrentWidget> {
   @override
   void initState() {
-    fetchInitialData();
+    super.initState();
+    fetchInitCurrent();
   }
 
-  Future<void> fetchInitialData() async {
+  Future<void> fetchInitCurrent() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final currentProvider =
         Provider.of<CurrentDataProvider>(context, listen: false);
     User? user = userProvider.user;
-    final serverUrl = dotenv.env['SERVER_URL']!;
+    final serverUrl = dotenv.env['SERVER_URL'];
     if (serverUrl == null) {
       print('SERVER_URL is not defined in env file.');
       return;
@@ -119,10 +119,6 @@ class _CurrentWidgetState extends State<CurrentWidget> {
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.visibility),
-            onPressed: _launchViewer,
-          )
         ],
       ),
     );
@@ -140,12 +136,5 @@ class _CurrentWidgetState extends State<CurrentWidget> {
         );
       },
     );
-  }
-
-  Future<void> _launchViewer() async {
-    final UserProvider userProvider =
-        Provider.of<UserProvider>(context, listen: false);
-    final uid = userProvider.user!.uid;
-    html.window.open('/viewer/current?uid=$uid', '_blank', 'popup');
   }
 }
