@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/todo.dart';
+import './input/container.dart';
 
 class TodoItemWidget extends StatelessWidget {
   final TodoItem todo;
@@ -65,7 +66,16 @@ class TodoItemWidget extends StatelessWidget {
   }
 
   void _onPressedEdit(BuildContext context, TodoItem todo) {
-    Provider.of<TodoProvider>(context, listen: false).enterEditMode(todo);
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+    todoProvider.enterEditMode(todo);
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return const Dialog(child: TodoInputWidget());
+        }).then((_) {
+      todoProvider.exitEditMode();
+    });
   }
 
   void _onPressedDelete(BuildContext context, TodoItem todo) {

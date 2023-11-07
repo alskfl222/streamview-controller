@@ -109,7 +109,12 @@ class _TodoWidgetState extends State<TodoWidget> {
                     ),
                   ],
                 ),
-                const TodoInputWidget()
+                Row(
+                  children: [
+                    OutlinedButton(
+                        onPressed: _showAddTodoModal, child: Text('할일 추가'))
+                  ],
+                )
               ],
             ),
           ),
@@ -145,8 +150,19 @@ class _TodoWidgetState extends State<TodoWidget> {
         Provider.of<TodoProvider>(context, listen: false);
     final uid = userProvider.user!.uid;
     final formattedDate = DateFormat('yyyy-MM-dd').format(todoProvider.date);
-    html.window.open(
-        '/viewer/todo?date=$formattedDate&uid=$uid', '_blank', 'popup');
+    html.window
+        .open('/viewer/todo?date=$formattedDate&uid=$uid', '_blank', 'popup');
+  }
+
+  void _showAddTodoModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const Dialog(
+          child: TodoInputWidget(),
+        );
+      },
+    );
   }
 
   void _sendTodos() async {

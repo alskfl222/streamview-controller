@@ -47,7 +47,11 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
         selected: _selected,
         onChanged: (newSelected) {
           setState(() {
-            _selected = newSelected;
+            _selected = Map<String, dynamic>.from({
+              ...newSelected,
+              'activity': newSelected['activity'] ??
+                  Map<String, dynamic>.from(newSelected['activity']),
+            });
           });
         },
         textController: _activityController,
@@ -72,7 +76,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
             DropdownButton<String>(
               value: _selected['type'],
               items:
-                  ['게임', '다른 할일'].map<DropdownMenuItem<String>>((String value) {
+              ['게임', '다른 할일'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -142,10 +146,11 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                   if (_selected['type'] == '게임')
                     activityWidgets[_selected['kind']] ??
                         activityWidgets['다른 게임']!
-                  else if (_selected['type'] == '다른 할일')
-                    const SizedBox(
-                      width: 100,
-                    ),
+                  else
+                    if (_selected['type'] == '다른 할일')
+                      const SizedBox(
+                        width: 100,
+                      ),
                   Row(
                     children: [
                       IconButton(
@@ -184,7 +189,10 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
 
   void _handleAddTodo() {
     TodoProvider todoProvider =
-        Provider.of<TodoProvider>(context, listen: false);
+    Provider.of<TodoProvider>(context, listen: false);
+    _selected.forEach((key, value) {
+      print('$key has type ${value.runtimeType} and value $value');
+    });
     if (_selected['type'] != null) {
       final todoItem = TodoItem(
         id: todoProvider.isEditMode
@@ -193,7 +201,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
         // 추가 모드인 경우 새 ID 생성
         type: _selected['type'],
         kind: _otherGameController.text.isNotEmpty &&
-                !todoProvider.gameKinds.contains(_otherGameController.text)
+            !todoProvider.gameKinds.contains(_otherGameController.text)
             ? _otherGameController.text
             : _selected['kind'],
         activity: _selected['activity'],
@@ -213,6 +221,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
       }
 
       _resetInputState();
+      Navigator.pop(context);
     }
   }
 
