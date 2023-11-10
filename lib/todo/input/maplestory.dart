@@ -85,9 +85,9 @@ class _MaplestoryActivityWidgetState extends State<MaplestoryActivityWidget> {
     );
   }
 
-  void _updateActivity(String key, dynamic value) {
-    Map<String, dynamic> newActivity =
-        Map<String, dynamic>.from(widget.selected['activity'] ?? {})
+  void _updateActivity(String key, String? value) {
+    Map<String, String?> newActivity =
+        Map<String, String?>.from(widget.selected['activity'] ?? {})
           ..[key] = value;
 
     widget.onChanged({...widget.selected, 'activity': newActivity});

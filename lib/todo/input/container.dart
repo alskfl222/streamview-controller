@@ -46,11 +46,12 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
       "메이플스토리": MaplestoryActivityWidget(
         selected: _selected,
         onChanged: (newSelected) {
+          print(newSelected.runtimeType);
           setState(() {
             _selected = Map<String, dynamic>.from({
               ...newSelected,
               'activity': newSelected['activity'] ??
-                  Map<String, dynamic>.from(newSelected['activity']),
+                  Map<String, String?>.from(newSelected['activity']),
             });
           });
         },

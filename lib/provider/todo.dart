@@ -27,7 +27,7 @@ class TodoItem {
       id: json['id'] as String,
       type: json['type'] as String,
       kind: json['kind'] as String,
-      activity: _decodeMap(json['activity'] as Map<String, dynamic>?),
+      activity: _decodeMap(json['activity'] as Map<String, String?>?),
       addedTime: json['addedTime'] as String,
       plannedStartTime: json['plannedStartTime'] as String?,
       actualStartTime: json['actualStartTime'] as String?,
@@ -49,14 +49,14 @@ class TodoItem {
   }
 
   Map<String, dynamic> _encodeMap(Map<String, String?> map) {
-    final result = <String, dynamic>{};
+    final result = <String, String>{};
     map.forEach((key, value) {
       result[key] = value ?? 'null'; // null 값을 'null' 문자열로 변환
     });
     return result;
   }
 
-  static Map<String, String?>? _decodeMap(Map<String, dynamic>? json) {
+  static Map<String, String?>? _decodeMap(Map<String, String?>? json) {
     return json?.map((key, value) => MapEntry(key, value?.toString()));
   }
 
