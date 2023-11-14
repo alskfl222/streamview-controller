@@ -112,7 +112,8 @@ class _TodoWidgetState extends State<TodoWidget> {
                 Row(
                   children: [
                     OutlinedButton(
-                        onPressed: _showAddTodoModal, child: Text('할일 추가'))
+                        onPressed: _showAddTodoModal,
+                        child: const Text('할일 추가'))
                   ],
                 )
               ],
@@ -177,7 +178,6 @@ class _TodoWidgetState extends State<TodoWidget> {
     final token = await user.getIdToken();
 
     final todoData = todoProvider.todoData;
-    print(todoData);
 
     final serverUrl = dotenv.env['SERVER_URL']!;
     if (serverUrl == null) {

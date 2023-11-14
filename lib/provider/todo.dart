@@ -23,11 +23,14 @@ class TodoItem {
   });
 
   factory TodoItem.fromJson(Map<String, dynamic> json) {
+    json.forEach((key, value) {
+      print('$key has type ${value.runtimeType} and value $value');
+    });
     return TodoItem(
       id: json['id'] as String,
       type: json['type'] as String,
       kind: json['kind'] as String,
-      activity: _decodeMap(json['activity'] as Map<String, String?>?),
+      activity: _decodeMap(json['activity'] as Map<String, dynamic>?),
       addedTime: json['addedTime'] as String,
       plannedStartTime: json['plannedStartTime'] as String?,
       actualStartTime: json['actualStartTime'] as String?,
@@ -56,8 +59,18 @@ class TodoItem {
     return result;
   }
 
-  static Map<String, String?>? _decodeMap(Map<String, String?>? json) {
-    return json?.map((key, value) => MapEntry(key, value?.toString()));
+  static Map<String, String?>? _decodeMap(Map<String, dynamic>? json) {
+    if (json == null) return null;
+
+    final result = <String, String?>{};
+    json.forEach((key, value) {
+      if (value == null || value is String) {
+        result[key] = value;
+      } else {
+        result[key] = value.toString();
+      }
+    });
+    return result;
   }
 
   Icon get statusIcon {
@@ -148,6 +161,7 @@ class TodoProvider with ChangeNotifier {
 
   void setTodos(List<dynamic> todosJson) {
     _todos = todosJson.map((todoJson) {
+      print(todoJson.toString());
       final todo = TodoItem.fromJson(todoJson);
       final kind = todo.kind;
 
@@ -165,7 +179,6 @@ class TodoProvider with ChangeNotifier {
   void changeDate(DateTime newDate) {
     _date = newDate;
     notifyListeners();
-    print("changeDate");
   }
 
   void addTodo(TodoItem todo) {

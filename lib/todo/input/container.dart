@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../provider/todo.dart';
 import 'maplestory.dart';
@@ -15,7 +16,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
   final TextEditingController _activityController = TextEditingController();
   final Map<String, dynamic> _initialTodo = {
     'type': null, // 게임, 다른 할일, ...
-    'date': DateTime.now(),
+    'date': null,
     'kind': null, // 게임 종류 등 (메이플스토리 등)
     'activity': null, // (메이플스토리 내에서 할일)
     'plannedStartTime': null, // 할일 시작 예정 시간
@@ -23,11 +24,15 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     'endTime': null, // 할일 마무리 시간
   };
   late Map<String, dynamic> _selected = _initialTodo;
+  String _selectedPlannedStartTime = "";
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final todoProvider = Provider.of<TodoProvider>(context);
+    setState(() {
+      _selected['date'] = todoProvider.date;
+    });
     if (todoProvider.isEditMode && todoProvider.editingTodo != null) {
       _selected = {
         ...todoProvider.editingTodo!.toMap(),
@@ -46,7 +51,6 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
       "메이플스토리": MaplestoryActivityWidget(
         selected: _selected,
         onChanged: (newSelected) {
-          print(newSelected.runtimeType);
           setState(() {
             _selected = Map<String, dynamic>.from({
               ...newSelected,
@@ -77,7 +81,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
             DropdownButton<String>(
               value: _selected['type'],
               items:
-              ['게임', '다른 할일'].map<DropdownMenuItem<String>>((String value) {
+                  ['게임', '다른 할일'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -147,11 +151,10 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
                   if (_selected['type'] == '게임')
                     activityWidgets[_selected['kind']] ??
                         activityWidgets['다른 게임']!
-                  else
-                    if (_selected['type'] == '다른 할일')
-                      const SizedBox(
-                        width: 100,
-                      ),
+                  else if (_selected['type'] == '다른 할일')
+                    const SizedBox(
+                      width: 100,
+                    ),
                   Row(
                     children: [
                       IconButton(
@@ -171,6 +174,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
   }
 
   void _selectPlannedStartTime() async {
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -178,19 +182,25 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
 
     if (selectedTime != null) {
       DateTime now = DateTime.now();
-      _selected['plannedStartTime'] = DateTime(
-        now.year,
-        now.month,
-        now.day,
+      DateTime selectedDateTime = DateTime(
+        todoProvider.date.year, // 선택된 날짜의 연도
+        todoProvider.date.month, // 선택된 날짜의 월
+        todoProvider.date.day, // 선택된 날짜의 일
         selectedTime.hour,
         selectedTime.minute,
-      ).toIso8601String();
+      );
+      _selected['plannedStartTime'] = selectedDateTime.toIso8601String();
+
+      setState(() {
+        _selectedPlannedStartTime =
+            DateFormat('HH:mm').format(selectedDateTime);
+      });
     }
   }
 
   void _handleAddTodo() {
     TodoProvider todoProvider =
-    Provider.of<TodoProvider>(context, listen: false);
+        Provider.of<TodoProvider>(context, listen: false);
     _selected.forEach((key, value) {
       print('$key has type ${value.runtimeType} and value $value');
     });
@@ -202,7 +212,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
         // 추가 모드인 경우 새 ID 생성
         type: _selected['type'],
         kind: _otherGameController.text.isNotEmpty &&
-            !todoProvider.gameKinds.contains(_otherGameController.text)
+                !todoProvider.gameKinds.contains(_otherGameController.text)
             ? _otherGameController.text
             : _selected['kind'],
         activity: _selected['activity'],

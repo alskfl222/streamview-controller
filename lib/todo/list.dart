@@ -10,6 +10,20 @@ class TodoListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TodoProvider todoProvider = Provider.of<TodoProvider>(context);
+
+    if (todoProvider.todos.isEmpty) {
+      // 할일 리스트가 비어있을 때 표시할 위젯
+      return const Expanded(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            '할일이 없습니다',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+    }
+
     return Expanded(
       child: ReorderableListView(
         buildDefaultDragHandles: false,
