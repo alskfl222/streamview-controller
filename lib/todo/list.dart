@@ -3,37 +3,55 @@ import 'package:provider/provider.dart';
 import '../provider/todo.dart';
 import 'item.dart';
 
-class TodoListWidget extends StatelessWidget {
-  const TodoListWidget(
-      {super.key});
+class TodoListWidget extends StatefulWidget {
+  const TodoListWidget({super.key});
+
+  @override
+  _TodoListWidgetState createState() => _TodoListWidgetState();
+}
+
+class _TodoListWidgetState extends State<TodoListWidget> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentTodo());
+  }
+
+  void _scrollToCurrentTodo() {
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+    if (todoProvider.todos.isNotEmpty) {
+      int currentIndex = todoProvider.getCurrentTodoIndex();
+      if (currentIndex != -1) {
+        double position = currentIndex * TodoItemWidget.itemHeight;
+        _scrollController.animateTo(
+          position,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    TodoProvider todoProvider = Provider.of<TodoProvider>(context);
-
-    if (todoProvider.todos.isEmpty) {
-      // 할일 리스트가 비어있을 때 표시할 위젯
-      return const Expanded(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text(
-            '할일이 없습니다',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-      );
-    }
-
+    final todoProvider = Provider.of<TodoProvider>(context);
     return Expanded(
-      child: ReorderableListView(
-        buildDefaultDragHandles: false,
-        onReorder: todoProvider.onReorder,
-        children: todoProvider.todos.map((todo) {
-          int index = todoProvider.todos.indexOf(todo);
-          return TodoItemWidget(
-              key: ValueKey(todo.id), todo: todo, index: index);
-        }).toList(),
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: todoProvider.todos.length,
+        itemBuilder: (context, index) {
+          final todo = todoProvider.todos[index];
+          return TodoItemWidget(todo: todo, index: index);
+        },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 }

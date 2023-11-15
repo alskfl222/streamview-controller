@@ -128,6 +128,7 @@ class TodoProvider with ChangeNotifier {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   List<TodoItem> _todos = [];
   TodoItem? _editingTodo;
+  TodoItem? _currentTodo;
   final List<String> _defaultGameKinds = ["메이플스토리"];
   final List<String> _addedGameKinds = [];
 
@@ -201,6 +202,76 @@ class TodoProvider with ChangeNotifier {
   void deleteTodo(String todoId) {
     _todos.removeWhere((todo) => todo.id == todoId);
     notifyListeners();
+  }
+
+  void sortTodos() {
+    _todos.sort((a, b) {
+      // 시작하지 않은 할일
+      if (a.actualStartTime == null && b.actualStartTime == null) {
+        return a.addedTime.compareTo(b.addedTime);
+      }
+      // 시작했지만 완료하지 않은 할일
+      else if (a.actualStartTime != null && a.endTime == null &&
+          b.actualStartTime != null && b.endTime == null) {
+        return a.actualStartTime!.compareTo(b.actualStartTime!);
+      }
+      // 완료된 할일
+      else if (a.endTime != null && b.endTime != null) {
+        return a.endTime!.compareTo(b.endTime!);
+      }
+      // 다른 상황
+      else {
+        // 시작하지 않은 할일은 완료된 할일보다 앞에 위치
+        if (a.actualStartTime == null) return -1;
+        if (b.actualStartTime == null) return 1;
+        // 한 할일이 완료되었고 다른 할일은 완료되지 않았다면, 완료되지 않은 할일이 먼저 오도록 함
+        if (a.endTime == null) return -1;
+        if (b.endTime == null) return 1;
+        // 기타 상황
+        return 0;
+      }
+    });
+    notifyListeners();
+  }
+
+  // 현재 진행 중인 할일을 찾는 메서드
+  void findCurrentTodo() {
+    // 진행 중인 할일이 있는지 체크
+    _currentTodo = _todos.firstWhere(
+          (todo) => todo.actualStartTime != null && todo.endTime == null,
+      orElse: () => _findNextPlannedTodo(),
+    );
+    notifyListeners();
+  }
+
+  // 예정된 시작 시간이 가장 빠른 할일을 찾는 메서드
+  TodoItem _findNextPlannedTodo() {
+    return _todos.firstWhere(
+          (todo) => todo.plannedStartTime != null,
+      orElse: () => _todos.firstWhere(
+            (todo) => todo.actualStartTime == null && todo.endTime == null,
+        orElse: () => TodoItem(
+          // 기본 할일 객체
+          id: 'default',
+          type: 'None',
+          kind: 'None',
+          addedTime: DateTime.now().toIso8601String(),
+        ),
+      ),
+    );
+  }
+
+  // 현재 진행 중인 할일의 인덱스를 반환하는 메서드
+  int getCurrentTodoIndex() {
+    if (_todos.isEmpty) {
+      return -1;
+    }
+    return _todos.indexOf(_currentTodo!);
+  }
+
+  // 주어진 할일이 현재 진행 중인 할일인지 확인하는 메서드
+  bool isCurrentTodo(TodoItem todo) {
+    return todo == _currentTodo;
   }
 
   void onReorder(int oldIndex, int newIndex) {
