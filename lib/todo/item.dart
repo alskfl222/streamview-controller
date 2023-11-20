@@ -32,6 +32,10 @@ class TodoItemWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              icon: const Icon(Icons.copy),
+              onPressed: () => _onPressedCopy(context, todo),
+            ),
+            IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => _onPressedEdit(context, todo),
             ),
@@ -49,12 +53,40 @@ class TodoItemWidget extends StatelessWidget {
   List<Widget> _buildDetails(TodoItem todo) {
     // 세부사항을 구성하는 위젯 리스트를 생성합니다.
     List<Widget> details = [];
-    // 예시: 할일의 세부사항을 추가합니다.
-    // 예를 들어, todo.activity와 같은 추가 정보를 여기에 포함시킬 수 있습니다.
+
+    // 'activity' 정보 추가
     if (todo.activity != null) {
       details.add(ListTile(title: Text('Activity: ${todo.activity}')));
     }
+    // 'addedTime' 정보 추가
+    if (todo.addedTime.isNotEmpty) {
+      details.add(ListTile(title: Text('Added Time: ${todo.addedTime}')));
+    }
+
+    // 'plannedStartTime', 'actualStartTime', 'endTime' 정보 추가
+    if (todo.plannedStartTime != null) {
+      details.add(ListTile(title: Text('Planned Start Time: ${todo.plannedStartTime}')));
+    }
+    if (todo.actualStartTime != null) {
+      details.add(ListTile(title: Text('Actual Start Time: ${todo.actualStartTime}')));
+    }
+    if (todo.endTime != null) {
+      details.add(ListTile(title: Text('End Time: ${todo.endTime}')));
+    }
     return details;
+  }
+
+  void _onPressedCopy(BuildContext context, TodoItem todo) {
+    final todoProvider = Provider.of<TodoProvider>(context, listen: false);
+    todoProvider.copyTodo(todo);
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return const Dialog(child: TodoInputWidget());
+        }).then((_) {
+      todoProvider.resetCopyTodo(); // 입력 완료 후 모드 종료
+    });
   }
 
   void _onPressedEdit(BuildContext context, TodoItem todo) {

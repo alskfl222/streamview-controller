@@ -33,6 +33,11 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     setState(() {
       _selected['date'] = todoProvider.date;
     });
+    if (todoProvider.copiedTodo != null) {
+      _selected = {
+        ...todoProvider.copiedTodo!.toMap(),
+      };
+    }
     if (todoProvider.isEditMode && todoProvider.editingTodo != null) {
       _selected = {
         ...todoProvider.editingTodo!.toMap(),
@@ -202,7 +207,6 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     TodoProvider todoProvider =
         Provider.of<TodoProvider>(context, listen: false);
     _selected.forEach((key, value) {
-      print('$key has type ${value.runtimeType} and value $value');
     });
     if (_selected['type'] != null) {
       final todoItem = TodoItem(

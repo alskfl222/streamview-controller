@@ -24,6 +24,7 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   @override
   void didChangeDependencies() {
+    super.didChangeDependencies();
     final todoProvider = Provider.of<TodoProvider>(context);
     if (_date != todoProvider.date) {
       _fetchInitTodo();
@@ -36,14 +37,12 @@ class _TodoWidgetState extends State<TodoWidget> {
         Provider.of<TodoProvider>(context, listen: false);
     User? user = userProvider.user;
     if (user == null) {
-      print('No user is signed in.');
       return;
     }
     final token = await user.getIdToken();
 
     final serverUrl = dotenv.env['SERVER_URL'];
     if (serverUrl == null) {
-      print('SERVER_URL is not defined in env file.');
       return;
     }
     final String formattedDate =
@@ -120,11 +119,21 @@ class _TodoWidgetState extends State<TodoWidget> {
             ),
           ),
           const TodoListWidget(),
-          ElevatedButton(
-            onPressed: _sendTodos,
-            child: const Text("Save"),
-          ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            onPressed: _sendTodos,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue, // 버튼 배경 색상
+              foregroundColor: Colors.white, // 텍스트 색상
+              padding: const EdgeInsets.symmetric(vertical: 15), // 버튼 내부 패딩
+            ),
+            child: const Text("할일 전송"),
+          ),
+        ),
       ),
     );
   }
@@ -172,7 +181,6 @@ class _TodoWidgetState extends State<TodoWidget> {
         Provider.of<TodoProvider>(context, listen: false);
     User? user = userProvider.user;
     if (user == null) {
-      print('No user is signed in.');
       return;
     }
     final token = await user.getIdToken();
@@ -181,7 +189,6 @@ class _TodoWidgetState extends State<TodoWidget> {
 
     final serverUrl = dotenv.env['SERVER_URL']!;
     if (serverUrl == null) {
-      print('SERVER_URL is not defined in env file.');
       return;
     }
     final postResponse = await http.post(

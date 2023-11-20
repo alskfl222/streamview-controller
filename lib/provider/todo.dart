@@ -23,9 +23,6 @@ class TodoItem {
   });
 
   factory TodoItem.fromJson(Map<String, dynamic> json) {
-    json.forEach((key, value) {
-      print('$key has type ${value.runtimeType} and value $value');
-    });
     return TodoItem(
       id: json['id'] as String,
       type: json['type'] as String,
@@ -127,8 +124,9 @@ class TodoProvider with ChangeNotifier {
   DateTime _date =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   List<TodoItem> _todos = [];
-  TodoItem? _editingTodo;
   TodoItem? _currentTodo;
+  TodoItem? _editingTodo;
+  TodoItem? _copiedTodo;
   final List<String> _defaultGameKinds = ["메이플스토리"];
   final List<String> _addedGameKinds = [];
 
@@ -138,7 +136,11 @@ class TodoProvider with ChangeNotifier {
 
   List<TodoItem> get todos => _todos;
 
+  TodoItem? get currentTodo => _currentTodo;
+
   TodoItem? get editingTodo => _editingTodo;
+
+  TodoItem? get copiedTodo => _copiedTodo;
 
   List<String> get gameKinds =>
       List.from(_defaultGameKinds)..addAll(_addedGameKinds);
@@ -160,9 +162,18 @@ class TodoProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void copyTodo(TodoItem todo) {
+    _copiedTodo = todo;
+    notifyListeners();
+  }
+
+  void resetCopyTodo() {
+    _copiedTodo = null;
+    notifyListeners();
+  }
+
   void setTodos(List<dynamic> todosJson) {
     _todos = todosJson.map((todoJson) {
-      print(todoJson.toString());
       final todo = TodoItem.fromJson(todoJson);
       final kind = todo.kind;
 
@@ -175,6 +186,7 @@ class TodoProvider with ChangeNotifier {
       return todo;
     }).toList();
     notifyListeners();
+    findCurrentTodo();
   }
 
   void changeDate(DateTime newDate) {
@@ -185,16 +197,16 @@ class TodoProvider with ChangeNotifier {
   void addTodo(TodoItem todo) {
     _todos.add(todo);
     notifyListeners();
+    findCurrentTodo();
   }
 
   void updateTodo(TodoItem updatedTodo) {
     int index = _todos.indexWhere((todo) => todo.id == updatedTodo.id);
     if (index != -1) {
-      print("수정 인덱스: $index");
       _todos[index] = updatedTodo;
       notifyListeners();
+      findCurrentTodo();
     } else {
-      print("기존 할일을 찾지 못함");
     }
     exitEditMode();
   }
@@ -202,6 +214,7 @@ class TodoProvider with ChangeNotifier {
   void deleteTodo(String todoId) {
     _todos.removeWhere((todo) => todo.id == todoId);
     notifyListeners();
+    findCurrentTodo();
   }
 
   void sortTodos() {
@@ -232,6 +245,7 @@ class TodoProvider with ChangeNotifier {
       }
     });
     notifyListeners();
+    findCurrentTodo();
   }
 
   // 현재 진행 중인 할일을 찾는 메서드
@@ -272,15 +286,6 @@ class TodoProvider with ChangeNotifier {
   // 주어진 할일이 현재 진행 중인 할일인지 확인하는 메서드
   bool isCurrentTodo(TodoItem todo) {
     return todo == _currentTodo;
-  }
-
-  void onReorder(int oldIndex, int newIndex) {
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
-    final item = _todos.removeAt(oldIndex);
-    _todos.insert(newIndex, item);
-    notifyListeners();
   }
 
   void addGameKind(String newGameKind) {
