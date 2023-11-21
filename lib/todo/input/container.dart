@@ -186,7 +186,6 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
     );
 
     if (selectedTime != null) {
-      DateTime now = DateTime.now();
       DateTime selectedDateTime = DateTime(
         todoProvider.date.year, // 선택된 날짜의 연도
         todoProvider.date.month, // 선택된 날짜의 월
@@ -206,8 +205,7 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
   void _handleAddTodo() {
     TodoProvider todoProvider =
         Provider.of<TodoProvider>(context, listen: false);
-    _selected.forEach((key, value) {
-    });
+    _selected.forEach((key, value) {});
     if (_selected['type'] != null) {
       final todoItem = TodoItem(
         id: todoProvider.isEditMode
@@ -222,6 +220,8 @@ class _TodoInputWidgetState extends State<TodoInputWidget> {
         activity: _selected['activity'],
         addedTime: DateTime.now().toIso8601String(),
         plannedStartTime: _selected['plannedStartTime'],
+        actualStartTime: _selected['actualStartTime'],
+        endTime: _selected['endTime'],
       );
 
       if (!todoProvider.gameKinds.contains(_otherGameController.text) &&

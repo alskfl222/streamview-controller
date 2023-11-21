@@ -16,36 +16,57 @@ class TodoItemWidget extends StatelessWidget {
     final todoProvider = Provider.of<TodoProvider>(context, listen: false);
     bool isCurrent = todoProvider.isCurrentTodo(todo);
 
-    return ListTileTheme(
-      contentPadding: EdgeInsets.zero,
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.all(16.0),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8.0),
-            Text("종류: ${todo.type}"),
-            Text("${todo.type}: ${todo.kind}"),
-          ],
+    Color borderColor = todo.getItemColor();
+    // 현재 진행 중인 할일에 대한 스타일
+    final currentTodoStyle = TextStyle(
+      color: isCurrent ? Colors.blue : Colors.black,
+      fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor, width: 2.0), // 외곽선 설정
+        borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 설정
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: ListTileTheme(
+        contentPadding: EdgeInsets.zero,
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.all(16.0),
+          backgroundColor: isCurrent ? Colors.blue.shade50 : Colors.white,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "종류: ${todo.type}",
+                style: currentTodoStyle,
+              ),
+              Text(
+                "${todo.type}: ${todo.kind}",
+                style: currentTodoStyle,
+              ),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () => _onPressedCopy(context, todo),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _onPressedEdit(context, todo),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _onPressedDelete(context, todo),
+              ),
+            ],
+          ),
+          children: _buildDetails(todo), // 세부사항을 표시하는 위젯 리스트
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.copy),
-              onPressed: () => _onPressedCopy(context, todo),
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _onPressedEdit(context, todo),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () => _onPressedDelete(context, todo),
-            ),
-          ],
-        ),
-        children: _buildDetails(todo), // 세부사항을 표시하는 위젯 리스트
       ),
     );
   }
@@ -65,10 +86,12 @@ class TodoItemWidget extends StatelessWidget {
 
     // 'plannedStartTime', 'actualStartTime', 'endTime' 정보 추가
     if (todo.plannedStartTime != null) {
-      details.add(ListTile(title: Text('Planned Start Time: ${todo.plannedStartTime}')));
+      details.add(ListTile(
+          title: Text('Planned Start Time: ${todo.plannedStartTime}')));
     }
     if (todo.actualStartTime != null) {
-      details.add(ListTile(title: Text('Actual Start Time: ${todo.actualStartTime}')));
+      details.add(
+          ListTile(title: Text('Actual Start Time: ${todo.actualStartTime}')));
     }
     if (todo.endTime != null) {
       details.add(ListTile(title: Text('End Time: ${todo.endTime}')));

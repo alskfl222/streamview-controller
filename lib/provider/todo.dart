@@ -35,6 +35,18 @@ class TodoItem {
     );
   }
 
+  TodoItem.copyFrom(TodoItem original)
+      : id = original.id,
+        type = original.type,
+        kind = original.kind,
+        activity = original.activity != null
+            ? Map<String, String?>.from(original.activity!)
+            : null,
+        addedTime = DateTime.now().toIso8601String(),
+        plannedStartTime = null,
+        actualStartTime = null,
+        endTime = null;
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -86,6 +98,18 @@ class TodoItem {
     }
   }
 
+  Color getItemColor() {
+    if (id == 'default') {
+      return Colors.grey.shade300; // 할일이 없는 경우
+    } else if (actualStartTime == null && endTime == null) {
+      return Colors.orange.shade100; // 시작 전
+    } else if (actualStartTime != null && endTime == null) {
+      return Colors.green.shade100; // 진행 중
+    } else {
+      return Colors.blue.shade100; // 완료됨
+    }
+  }
+
   String get displayStatus {
     final formatter = DateFormat('yyyy-MM-dd HH:mm');
 
@@ -122,7 +146,7 @@ class TodoItem {
 class TodoProvider with ChangeNotifier {
   bool _isEditMode = false;
   DateTime _date =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   List<TodoItem> _todos = [];
   TodoItem? _currentTodo;
   TodoItem? _editingTodo;
@@ -146,9 +170,9 @@ class TodoProvider with ChangeNotifier {
       List.from(_defaultGameKinds)..addAll(_addedGameKinds);
 
   Map<String, dynamic> get todoData => {
-        'date': _date.toIso8601String(),
-        'todos': _todos.map((todo) => todo.toMap()).toList(),
-      };
+    'date': _date.toIso8601String(),
+    'todos': _todos.map((todo) => todo.toMap()).toList(),
+  };
 
   void enterEditMode(TodoItem todoItem) {
     _isEditMode = true;
@@ -163,7 +187,7 @@ class TodoProvider with ChangeNotifier {
   }
 
   void copyTodo(TodoItem todo) {
-    _copiedTodo = todo;
+    _copiedTodo = TodoItem.copyFrom(todo);
     notifyListeners();
   }
 
@@ -286,6 +310,24 @@ class TodoProvider with ChangeNotifier {
   // 주어진 할일이 현재 진행 중인 할일인지 확인하는 메서드
   bool isCurrentTodo(TodoItem todo) {
     return todo == _currentTodo;
+  }
+
+  void startTodo(String todoId) {
+    int index = _todos.indexWhere((todo) => todo.id == todoId);
+    if (index != -1) {
+      _todos[index].actualStartTime = DateTime.now().toIso8601String();
+      notifyListeners();
+      findCurrentTodo();
+    }
+  }
+
+  void completeTodo(String todoId) {
+    int index = _todos.indexWhere((todo) => todo.id == todoId);
+    if (index != -1) {
+      _todos[index].endTime = DateTime.now().toIso8601String();
+      notifyListeners();
+      findCurrentTodo();
+    }
   }
 
   void addGameKind(String newGameKind) {
