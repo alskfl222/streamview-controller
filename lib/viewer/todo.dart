@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '/provider/todo.dart';
-// import '/util/dummy.dart';
 
 class TodoViewerWidget extends StatefulWidget {
   final String date;
@@ -30,7 +29,8 @@ class _TodoViewerWidgetState extends State<TodoViewerWidget> {
   void initState() {
     super.initState();
     _viewerId = const Uuid().v4();
-    final websocketUrl = '${dotenv.env['WEBSOCKET_URL']}/todo/$_viewerId';
+    final websocketUrl =
+        '${dotenv.env['WEBSOCKET_URL']}/viewer/todo/$_viewerId';
     _channel = WebSocketChannel.connect(Uri.parse(websocketUrl!));
     _channel.stream.listen(
       (message) {
